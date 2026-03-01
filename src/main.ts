@@ -15,8 +15,7 @@ async function bootstrap() {
     app.useLogger(logger);
 
     await app.listen(port, host);
-    const appUrl = await app.getUrl();
-    logger.log(`Server running on: ${appUrl}`);
+    logger.log(`Server running on: http://${host}:${port}`);
 }
 
 void bootstrap();
