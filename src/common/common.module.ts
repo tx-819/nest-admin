@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import configs from './configs';
 import { CustomLoggerModule } from './logger/logger.module';
 import { ResponseModule } from './response/response.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
     imports: [
@@ -14,6 +15,7 @@ import { ResponseModule } from './response/response.module';
         }),
         CustomLoggerModule,
         ResponseModule,
+        DatabaseModule,
     ],
 })
 export class CommonModule {}
