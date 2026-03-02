@@ -11,6 +11,7 @@ import { Reflector } from '@nestjs/core';
 import { ClassTransformOptions } from 'class-transformer';
 import { isArray, isNil, isObject } from 'lodash';
 import { Observable, map } from 'rxjs';
+import { ApiSuccessResponseDto } from '../dtos/response.success.dto';
 
 @Injectable()
 export class ResponseInterceptor
@@ -75,12 +76,12 @@ export class ResponseInterceptor
 
                 const data = this.serialize(responseBody, options);
 
-                return {
+                return new ApiSuccessResponseDto(
                     statusCode,
-                    message: 'Success',
-                    timestamp: new Date().toISOString(),
-                    data,
-                };
+                    'Success',
+                    new Date().toISOString(),
+                    data
+                );
             })
         );
     }

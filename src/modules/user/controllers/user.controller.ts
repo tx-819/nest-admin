@@ -1,21 +1,21 @@
-import {
-    Body,
-    Controller,
-    Post,
-    HttpCode,
-    HttpStatus,
-    Get,
-    Query,
-} from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { BasePaginationQueryDto } from 'src/common/dtos';
+import { PaginationParamsDto } from 'src/common/helper/dtos';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { DocPaginatedResponse } from 'src/common/doc/decorators/doc.paginated.decorator';
+import { UserResponseDto } from '../dtos/user.dto';
+import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
 
 @Controller('user')
 export class UserController {
     constructor(private userService: UserService) {}
 
     @Get()
-    getUsers(@Query() query: BasePaginationQueryDto) {
-        return this.userService.getUsers(query);
+    @ApiOperation({ summary: 'Get users' })
+    @DocPaginatedResponse({ serialization: UserResponseDto })
+    async getUsers(
+        @Query() query: PaginationParamsDto
+    ): Promise<ApiPaginatedDataDto<UserResponseDto>> {
+        return await this.userService.getUsers(query);
     }
 }

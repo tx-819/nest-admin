@@ -7,6 +7,7 @@ import {
     BadRequestException,
     Logger,
 } from '@nestjs/common';
+import { ApiErrorResponseDto } from '../dtos/response.error.dto';
 
 @Catch()
 export class ResponseExceptionFilter implements ExceptionFilter {
@@ -17,7 +18,7 @@ export class ResponseExceptionFilter implements ExceptionFilter {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse();
         const request = ctx.getRequest();
-        const status =
+        const statusCode =
             exception instanceof HttpException
                 ? exception.getStatus()
                 : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -40,22 +41,23 @@ export class ResponseExceptionFilter implements ExceptionFilter {
         }
 
         // Log errors
-        if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+        if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
             this.logger.error(
-                `${request.method} ${request.url} - ${status}: ${message}`,
+                `${request.method} ${request.url} - ${statusCode}: ${message}`,
                 exception instanceof Error ? exception.stack : undefined
             );
-        } else if (status >= HttpStatus.BAD_REQUEST) {
+        } else if (statusCode >= HttpStatus.BAD_REQUEST) {
             this.logger.warn(
-                `${request.method} ${request.url} - ${status}: ${message}`
+                `${request.method} ${request.url} - ${statusCode}: ${message}`
             );
         }
 
-        const responseBody = {
-            code: status,
+        const responseBody = new ApiErrorResponseDto(
+            statusCode,
             message,
-        };
+            new Date().toISOString()
+        );
 
-        response.status(status).json(responseBody);
+        response.status(statusCode).json(responseBody);
     }
 }

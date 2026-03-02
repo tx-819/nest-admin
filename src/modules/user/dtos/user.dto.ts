@@ -3,9 +3,9 @@ import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/generated/prisma/client';
 import { Exclude } from 'class-transformer';
 import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
-import { BaseResponseDto } from 'src/common/dtos';
+import { BaseResponseDto } from 'src/common/helper/dtos';
 
-export class UserDto extends BaseResponseDto implements User {
+export class UserResponseDto extends BaseResponseDto implements User {
     @ApiProperty({
         example: faker.internet.email(),
     })

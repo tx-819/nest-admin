@@ -2,8 +2,9 @@ import { Transform } from 'class-transformer';
 import { IsInt, Min, IsDate, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { faker } from '@faker-js/faker';
+import { IPaginationParams } from '../interfaces/pagination.interface';
 
-export class BasePaginationQueryDto {
+export class PaginationParamsDto implements IPaginationParams {
     @ApiProperty({
         example: 1,
     })

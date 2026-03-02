@@ -1,20 +1,25 @@
-import { BasePaginationQueryDto } from 'src/common/dtos';
 import { PrismaService } from 'src/common/database/services/database.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from 'src/generated/prisma/client';
+import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
+import { UserResponseDto } from '../dtos/user.dto';
+import { HelperPaginationService } from 'src/common/helper/services/helper.pagination.service';
+import { PaginationParamsDto } from 'src/common/helper/dtos';
 
 @Injectable()
 export class UserService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private helperPaginationService: HelperPaginationService
+    ) {}
 
-    async getUsers(query: BasePaginationQueryDto) {
-        const { current, pageSize } = query;
-        const skip = (current - 1) * pageSize;
-        const take = pageSize;
-        return this.prisma.user.findMany({
-            skip,
-            take,
-        });
+    async getUsers(
+        query: PaginationParamsDto
+    ): Promise<ApiPaginatedDataDto<UserResponseDto>> {
+        return await this.helperPaginationService.paginate(
+            this.prisma.user,
+            query
+        );
     }
 
     async detail(id: number): Promise<User> {
