@@ -4,6 +4,7 @@ import configs from './configs';
 import { CustomLoggerModule } from './logger/logger.module';
 import { ResponseModule } from './response/response.module';
 import { DatabaseModule } from './database/database.module';
+import { RequestModule } from './request/request.module';
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { DatabaseModule } from './database/database.module';
         }),
         CustomLoggerModule,
         ResponseModule,
+        RequestModule,
         DatabaseModule,
     ],
 })
