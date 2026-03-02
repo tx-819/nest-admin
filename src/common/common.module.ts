@@ -19,5 +19,6 @@ import { RequestModule } from './request/request.module';
         RequestModule,
         DatabaseModule,
     ],
+    exports: [DatabaseModule],
 })
 export class CommonModule {}
