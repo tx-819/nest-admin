@@ -2,7 +2,13 @@ import { faker } from '@faker-js/faker';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/generated/prisma/client';
 import { Exclude } from 'class-transformer';
-import { IsEmail, IsBoolean, IsOptional, IsString } from 'class-validator';
+import {
+    IsEmail,
+    IsBoolean,
+    IsOptional,
+    IsString,
+    IsNotEmpty,
+} from 'class-validator';
 import { BaseResponseDto } from 'src/common/helper/dtos';
 import { PickType } from '@nestjs/swagger';
 
@@ -50,7 +56,13 @@ export class UserDto extends BaseResponseDto implements User {
 export class CreateUserDto extends PickType(UserDto, [
     'username',
     'nickname',
-    'password',
     'email',
     'avatar',
-]) {}
+]) {
+    @ApiProperty({
+        example: faker.internet.password(),
+    })
+    @IsString()
+    @IsNotEmpty()
+    password: string;
+}

@@ -2,6 +2,7 @@ import {
     BadRequestException,
     ForbiddenException,
     Injectable,
+    NotFoundException,
 } from '@nestjs/common';
 import { UserService } from 'src/modules/user/services/user.service';
 import { TokenService } from './token.service';
@@ -28,6 +29,9 @@ export class AuthService {
 
     async validateUser(username: string, password: string): Promise<any> {
         const user = await this.userService.findOne(username);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
         if (user && (await compare(password, user.password))) {
             const { password, ...result } = user;
             return result;

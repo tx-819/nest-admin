@@ -1,5 +1,10 @@
-import { applyDecorators } from '@nestjs/common';
-import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { applyDecorators, SerializeOptions } from '@nestjs/common';
+import {
+    ApiBearerAuth,
+    ApiExtraModels,
+    ApiResponse,
+    getSchemaPath,
+} from '@nestjs/swagger';
 
 import {
     ApiPaginatedDataDto,
@@ -7,11 +12,12 @@ import {
 } from 'src/common/response/dtos/response.paginated.dto';
 import { ApiSuccessResponseDto } from 'src/common/response/dtos/response.success.dto';
 import { IResponseDocOptions } from 'src/common/response/interfaces/response.interface';
+import { IS_PUBLIC_KEY } from 'src/modules/auth/decorators/public.decorator';
 
 export function DocPaginatedResponse<T>(
-    options: IResponseDocOptions<T>
+    options?: IResponseDocOptions<T>
 ): MethodDecorator {
-    const { serialization } = options;
+    const { serialization, isPublic } = options || {};
 
     const schema: Record<string, any> = {
         allOf: [
@@ -59,8 +65,13 @@ export function DocPaginatedResponse<T>(
         }),
     ];
 
+    if (!isPublic) {
+        decorators.push(ApiBearerAuth('accessToken'));
+    }
+
     if (serialization) {
         decorators.push(ApiExtraModels(serialization));
+        decorators.push(SerializeOptions({ type: serialization }));
     }
 
     return applyDecorators(...decorators);

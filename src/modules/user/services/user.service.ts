@@ -32,14 +32,11 @@ export class UserService {
         return user;
     }
 
-    async findOne(username: string): Promise<User> {
+    async findOne(username: string): Promise<User | null> {
         const user = await this.prisma.user.findUnique({
             where: { username },
         });
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-        return user;
+        return user ?? null;
     }
 
     async create(createDto: CreateUserDto): Promise<UserDto> {

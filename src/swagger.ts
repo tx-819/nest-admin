@@ -27,9 +27,8 @@ export default async function setupSwagger(
                 type: 'http',
                 scheme: 'bearer',
                 bearerFormat: 'JWT',
-                name: 'accessToken',
-                description: 'Enter your access token',
-                in: 'header',
+                description:
+                    '请输入登录后获取的 accessToken，无需加 Bearer 前缀',
             },
             'accessToken'
         )

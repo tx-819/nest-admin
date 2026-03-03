@@ -3,6 +3,7 @@ import { IsInt, Min, IsDate, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { faker } from '@faker-js/faker';
 import { IPaginationParams } from '../interfaces/pagination.interface';
+import dayjs from 'dayjs';
 
 export class PaginationParamsDto implements IPaginationParams {
     @ApiProperty({
@@ -33,11 +34,13 @@ export class BaseResponseDto {
         example: faker.date.past().toISOString(),
     })
     @IsDate()
+    @Transform(({ value }) => dayjs(value).format('YYYY-MM-DD HH:mm:ss'))
     createdAt: Date;
 
     @ApiProperty({
         example: faker.date.recent().toISOString(),
     })
     @IsDate()
+    @Transform(({ value }) => dayjs(value).format('YYYY-MM-DD HH:mm:ss'))
     updatedAt: Date;
 }

@@ -32,4 +32,5 @@ export interface IApiErrorResponse extends IApiBaseResponse {
 
 export interface IResponseDocOptions<T> {
     serialization?: ClassConstructor<T>;
+    isPublic?: boolean;
 }

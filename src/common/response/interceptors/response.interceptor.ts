@@ -11,6 +11,7 @@ import { Reflector } from '@nestjs/core';
 import { ClassTransformOptions } from 'class-transformer';
 import { isArray, isNil, isObject } from 'lodash';
 import { Observable, map } from 'rxjs';
+import dayjs from 'dayjs';
 import { ApiSuccessResponseDto } from '../dtos/response.success.dto';
 
 @Injectable()
@@ -40,7 +41,7 @@ export class ResponseInterceptor
             );
         }
         // 如果是分页数据,则对items中的每一项进行序列化
-        if ('meta' in response && 'items' in response) {
+        if ('metadata' in response && 'items' in response) {
             const items =
                 !isNil(response.items) && isArray(response.items)
                     ? response.items
@@ -72,14 +73,15 @@ export class ResponseInterceptor
             map(responseBody => {
                 const ctx = context.switchToHttp();
                 const response = ctx.getResponse();
-                const statusCode: number = response.statusCode;
+                response.status(200);
 
                 const data = this.serialize(responseBody, options);
 
+                const timestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
                 return new ApiSuccessResponseDto(
-                    statusCode,
+                    200,
                     'Success',
-                    new Date().toISOString(),
+                    timestamp,
                     data
                 );
             })

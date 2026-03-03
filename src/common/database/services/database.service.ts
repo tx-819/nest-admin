@@ -9,13 +9,8 @@ export class PrismaService
     implements OnModuleInit, OnModuleDestroy
 {
     constructor(private readonly configService: ConfigService) {
-        const adapter = new PrismaMariaDb({
-            host: configService.get<string>('database.host'),
-            port: configService.get<number>('database.port'),
-            user: configService.get<string>('database.user'),
-            password: configService.get<string>('database.password'),
-            database: configService.get<string>('database.name'),
-        });
+        const url = configService.get<string>('database.url');
+        const adapter = new PrismaMariaDb(url!);
         super({ adapter });
     }
 

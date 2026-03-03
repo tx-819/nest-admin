@@ -26,6 +26,8 @@ model User {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   roles     UserRole[]
+
+  @@map("user")
 }
 
 model Role {
@@ -37,6 +39,8 @@ model Role {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   users     UserRole[]
+
+  @@map("role")
 }
 
 model UserRole {
@@ -51,4 +55,5 @@ model UserRole {
   @@unique([userId, roleId])
   @@index([userId])
   @@index([roleId])
+  @@map("user_role")
 }
