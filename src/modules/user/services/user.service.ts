@@ -2,7 +2,7 @@ import { PrismaService } from 'src/common/database/services/database.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from 'src/generated/prisma/client';
 import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
-import { UserResponseDto } from '../dtos/user.dto';
+import { CreateUserDto, UserDto } from '../dtos/user.dto';
 import { HelperPaginationService } from 'src/common/helper/services/helper.pagination.service';
 import { PaginationParamsDto } from 'src/common/helper/dtos';
 
@@ -15,7 +15,7 @@ export class UserService {
 
     async getUsers(
         query: PaginationParamsDto
-    ): Promise<ApiPaginatedDataDto<UserResponseDto>> {
+    ): Promise<ApiPaginatedDataDto<UserDto>> {
         return await this.helperPaginationService.paginate(
             this.prisma.user,
             query
@@ -39,6 +39,13 @@ export class UserService {
         if (!user) {
             throw new NotFoundException('User not found');
         }
+        return user;
+    }
+
+    async create(createDto: CreateUserDto): Promise<UserDto> {
+        const user = await this.prisma.user.create({
+            data: createDto,
+        });
         return user;
     }
 }

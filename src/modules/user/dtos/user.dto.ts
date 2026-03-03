@@ -2,10 +2,11 @@ import { faker } from '@faker-js/faker';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/generated/prisma/client';
 import { Exclude } from 'class-transformer';
-import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsBoolean, IsOptional, IsString } from 'class-validator';
 import { BaseResponseDto } from 'src/common/helper/dtos';
+import { PickType } from '@nestjs/swagger';
 
-export class UserResponseDto extends BaseResponseDto implements User {
+export class UserDto extends BaseResponseDto implements User {
     @ApiProperty({
         example: faker.internet.email(),
     })
@@ -28,12 +29,28 @@ export class UserResponseDto extends BaseResponseDto implements User {
     username: string;
 
     @ApiProperty({
-        example: faker.helpers.arrayElement(Object.values(['admin', 'user'])),
+        example: faker.person.fullName(),
     })
-    @IsEnum(['admin', 'user'])
-    roles: string[];
+    @IsString()
+    @IsOptional()
+    nickname: string | null;
+
+    @ApiProperty({
+        example: faker.helpers.arrayElement([true, false]),
+    })
+    @IsBoolean()
+    @IsOptional()
+    status: boolean;
 
     @ApiHideProperty()
     @Exclude()
     password: string;
 }
+
+export class CreateUserDto extends PickType(UserDto, [
+    'username',
+    'nickname',
+    'password',
+    'email',
+    'avatar',
+]) {}

@@ -3,11 +3,12 @@ import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 
 import { ApiSuccessResponseDto } from 'src/common/response/dtos/response.success.dto';
 import { IResponseDocOptions } from 'src/common/response/interfaces/response.interface';
+import { SerializeOptions } from '@nestjs/common';
 
 export function DocResponse<T>(
-    options: IResponseDocOptions<T>
+    options?: IResponseDocOptions<T>
 ): MethodDecorator {
-    const { serialization } = options;
+    const { serialization } = options || {};
 
     const schema: Record<string, any> = {
         allOf: [
@@ -42,6 +43,7 @@ export function DocResponse<T>(
 
     if (serialization) {
         decorators.push(ApiExtraModels(serialization));
+        decorators.push(SerializeOptions({ type: serialization }));
     }
 
     return applyDecorators(...decorators);
