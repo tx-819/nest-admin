@@ -21,9 +21,11 @@ export class AuthService {
         if (!user) {
             throw new ForbiddenException('User not found');
         }
-        const { accessToken } = await this.tokenService.generateToken(user);
+        const { accessToken, refreshToken } =
+            await this.tokenService.generateToken(user);
         return {
             accessToken,
+            refreshToken,
         };
     }
 
@@ -49,5 +51,22 @@ export class AuthService {
             ...registerDto,
             password: hashedPassword,
         });
+    }
+
+    async refreshToken(refreshToken: string) {
+        const userId =
+            await this.tokenService.getUserIdByRefreshToken(refreshToken);
+        if (userId == null) {
+            throw new ForbiddenException('Invalid refresh token');
+        }
+        const user = await this.userService.detail(userId);
+        if (!user) {
+            throw new ForbiddenException('User not found');
+        }
+        await this.tokenService.verifyRefreshToken(userId, refreshToken);
+        const accessToken = await this.tokenService.createAccessToken(user);
+        return {
+            accessToken,
+        };
     }
 }

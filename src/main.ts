@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from 'nestjs-pino';
 import { APP_ENVIRONMENT } from './app/enums/app.enum';
 import setupSwagger from './swagger';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, new ExpressAdapter(), {
@@ -16,6 +17,7 @@ async function bootstrap() {
     const port = config.get('app.port');
     const host = config.get('app.host');
     app.useLogger(logger);
+    app.use(cookieParser());
 
     if (env !== APP_ENVIRONMENT.PRODUCTION) {
         setupSwagger(app);

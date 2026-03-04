@@ -5,6 +5,7 @@ import { CustomLoggerModule } from './logger/logger.module';
 import { ResponseModule } from './response/response.module';
 import { DatabaseModule } from './database/database.module';
 import { RequestModule } from './request/request.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { RequestModule } from './request/request.module';
         CustomLoggerModule,
         ResponseModule,
         RequestModule,
+        CacheModule,
         DatabaseModule,
     ],
     exports: [DatabaseModule],

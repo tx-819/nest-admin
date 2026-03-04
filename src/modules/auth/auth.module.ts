@@ -10,11 +10,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
+import { CacheModule } from 'src/common/cache/cache.module';
 
 @Module({
     imports: [
         UserModule,
         PassportModule,
+        CacheModule,
         JwtModule.registerAsync({
             useFactory: (configService: ConfigService) => ({
                 secret: configService.get<string>('auth.accessToken.secret'),

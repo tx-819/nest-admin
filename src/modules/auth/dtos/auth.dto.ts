@@ -13,7 +13,7 @@ export class LoginDto {
     password: string;
 }
 
-export class LoginResponseDto {
+export class AuthResponseDto {
     @ApiProperty({ description: '访问令牌' })
     @IsString()
     @IsNotEmpty()

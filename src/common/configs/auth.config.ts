@@ -7,5 +7,8 @@ export default registerAs(
             secret: process.env.AUTH_ACCESS_TOKEN_SECRET || 'secret',
             tokenExp: process.env.AUTH_ACCESS_TOKEN_EXP || '1h',
         },
+        refreshToken: {
+            ttl: process.env.AUTH_REFRESH_TOKEN_TTL || 60 * 60 * 24 * 7, // 过期时间7天
+        },
     })
 );
