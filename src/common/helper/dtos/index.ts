@@ -23,7 +23,7 @@ export class PaginationParamsDto implements IPaginationParams {
     pageSize: number;
 }
 
-export class BaseResponseDto {
+export class BaseDto {
     @ApiProperty({
         example: 1,
     })

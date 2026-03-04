@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty, PartialType } from '@nestjs/swagger';
 import { User } from 'src/generated/prisma/client';
 import { Exclude } from 'class-transformer';
 import {
@@ -9,10 +9,10 @@ import {
     IsString,
     IsNotEmpty,
 } from 'class-validator';
-import { BaseResponseDto } from 'src/common/helper/dtos';
+import { BaseDto } from 'src/common/helper/dtos';
 import { PickType } from '@nestjs/swagger';
 
-export class UserDto extends BaseResponseDto implements User {
+export class UserDto extends BaseDto implements User {
     @ApiProperty({
         example: faker.internet.email(),
     })
@@ -66,3 +66,10 @@ export class CreateUserDto extends PickType(UserDto, [
     @IsNotEmpty()
     password: string;
 }
+
+export class UpdateUserDto extends PickType(UserDto, [
+    'nickname',
+    'email',
+    'avatar',
+    'status',
+]) {}
