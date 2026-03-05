@@ -13,10 +13,15 @@ import { RoleService } from '../services/role.service';
 import { PaginationParamsDto } from 'src/common/helper/dtos';
 import { ApiOperation } from '@nestjs/swagger';
 import { DocPaginatedResponse } from 'src/common/doc/decorators/doc.paginated.decorator';
-import { UpdateRoleDto, RoleDto } from '../dtos/role.dto';
+import {
+    CreateRoleDto,
+    RoleDto,
+    SetRolePermissionsDto,
+    UpdateRoleDto,
+} from '../dtos/role.dto';
 import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
-import { CreateRoleDto } from '../dtos/role.dto';
 import { DocResponse } from 'src/common/doc/decorators/doc.response.decorator';
+import { PermissionDto } from 'src/modules/permission/dtos/permission.dto';
 
 @Controller('role')
 export class RoleController {
@@ -25,17 +30,34 @@ export class RoleController {
     @Get()
     @ApiOperation({ summary: '获取角色列表' })
     @DocPaginatedResponse({ serialization: RoleDto })
-    async getRoles(
+    getRoles(
         @Query() query: PaginationParamsDto
     ): Promise<ApiPaginatedDataDto<RoleDto>> {
-        return await this.roleService.getRoles(query);
+        return this.roleService.getRoles(query);
+    }
+
+    @Get(':id/permissions')
+    @ApiOperation({ summary: '查询当前角色已有的权限' })
+    @DocResponse({ serialization: PermissionDto })
+    getRolePermissions(@Param('id', ParseIntPipe) id: number) {
+        return this.roleService.getPermissions(id);
+    }
+
+    @Put(':id/permissions')
+    @ApiOperation({ summary: '为当前角色设置权限' })
+    @DocResponse()
+    async setRolePermissions(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: SetRolePermissionsDto
+    ): Promise<void> {
+        await this.roleService.setPermissions(id, dto);
     }
 
     @Get(':id')
     @ApiOperation({ summary: '获取角色详情' })
     @DocResponse()
-    async getRoleDetail(@Param('id', ParseIntPipe) id: number) {
-        return await this.roleService.detail(id);
+    getRoleDetail(@Param('id', ParseIntPipe) id: number) {
+        return this.roleService.detail(id);
     }
 
     @Post()

@@ -1,8 +1,13 @@
 import { PrismaService } from 'src/common/database/services/database.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Role } from 'src/generated/prisma/client';
+import { Permission, Role } from 'src/generated/prisma/client';
 import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
-import { CreateRoleDto, UpdateRoleDto, RoleDto } from '../dtos/role.dto';
+import {
+    CreateRoleDto,
+    UpdateRoleDto,
+    RoleDto,
+    SetRolePermissionsDto,
+} from '../dtos/role.dto';
 import { HelperPaginationService } from 'src/common/helper/services/helper.pagination.service';
 import { PaginationParamsDto } from 'src/common/helper/dtos';
 
@@ -47,8 +52,32 @@ export class RoleService {
     }
 
     async delete(id: number): Promise<void> {
-        await this.prisma.role.delete({
-            where: { id },
+        await this.detail(id);
+        await this.prisma.role.delete({ where: { id } });
+    }
+
+    async getPermissions(roleId: number): Promise<Permission[]> {
+        await this.detail(roleId);
+        const list = await this.prisma.rolePermission.findMany({
+            where: { roleId },
+            include: { permission: true },
         });
+        return list.map(item => item.permission);
+    }
+
+    async setPermissions(
+        roleId: number,
+        dto: SetRolePermissionsDto
+    ): Promise<void> {
+        await this.detail(roleId);
+        await this.prisma.rolePermission.deleteMany({ where: { roleId } });
+        if (dto.permissionIds.length > 0) {
+            await this.prisma.rolePermission.createMany({
+                data: dto.permissionIds.map(permissionId => ({
+                    roleId,
+                    permissionId,
+                })),
+            });
+        }
     }
 }

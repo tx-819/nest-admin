@@ -2,7 +2,9 @@ import { faker } from '@faker-js/faker';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Role } from 'src/generated/prisma/client';
 import {
+    IsArray,
     IsBoolean,
+    IsInt,
     IsOptional,
     IsString,
     IsNotEmpty,
@@ -49,3 +51,11 @@ export class CreateRoleDto extends PickType(RoleDto, ['name', 'code', 'remark', 
 }
 
 export class UpdateRoleDto extends PartialType(PickType(RoleDto, ['name', 'code', 'remark', 'status'])) {}
+
+/** 为角色设置权限（会清空该角色原有权限） */
+export class SetRolePermissionsDto {
+    @ApiProperty({ example: [1, 2, 3], description: '权限 id 列表' })
+    @IsArray()
+    @IsInt({ each: true })
+    permissionIds: number[];
+}
