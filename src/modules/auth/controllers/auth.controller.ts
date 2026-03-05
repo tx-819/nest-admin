@@ -56,7 +56,7 @@ export class AuthController {
             maxAge: ttl * 1000,
             path: '/',
         });
-        return { accessToken };
+        return { accessToken, user };
     }
 
     @Get('/me')

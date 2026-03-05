@@ -1,7 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PermissionDto } from './permission.dto';
+import { Exclude } from 'class-transformer';
 
 export class AuthListDto {
     @ApiProperty({ description: '权限标识' })
@@ -16,11 +17,15 @@ export class AuthListDto {
 }
 
 export class MenuTreeDto extends PermissionDto {
+    @ApiHideProperty()
+    @Exclude()
+    declare code: string | null;
+
     @ApiProperty({ type: [() => AuthListDto] })
     @Type(() => AuthListDto)
-    authList: AuthListDto[];
+    authList: AuthListDto[] | null;
 
     @ApiProperty({ type: [() => MenuTreeDto] })
     @Type(() => MenuTreeDto)
-    children: MenuTreeDto[];
+    children: MenuTreeDto[] | null;
 }

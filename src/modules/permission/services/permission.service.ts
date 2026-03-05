@@ -32,10 +32,13 @@ export class PermissionService {
     ): PermissionTreeDto[] {
         return list
             .filter(p => p.parentId === parentId)
-            .map(item => ({
-                ...item,
-                children: this.buildTree(list, item.id),
-            }));
+            .map(item => {
+                const children = this.buildTree(list, item.id);
+                return {
+                    ...item,
+                    children: children.length > 0 ? children : null,
+                };
+            });
     }
 
     async detail(id: number): Promise<Permission> {
@@ -161,7 +164,11 @@ export class PermissionService {
                 menusByParentId,
                 actionsByParentId
             );
-            return { ...menu, authList, children };
+            return {
+                ...menu,
+                authList: authList.length > 0 ? authList : null,
+                children: children.length > 0 ? children : null,
+            };
         });
     }
 }

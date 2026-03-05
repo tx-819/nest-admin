@@ -72,9 +72,9 @@ export class PermissionDto extends BaseDto implements Permission {
 }
 
 export class PermissionTreeDto extends PermissionDto {
-    @ApiProperty({ type: [() => PermissionTreeDto] })
+    @ApiProperty({ type: [() => PermissionTreeDto], nullable: true })
     @Type(() => PermissionTreeDto)
-    children: PermissionTreeDto[];
+    children: PermissionTreeDto[] | null;
 }
 
 export class CreatePermissionDto extends PickType(PermissionDto, [
