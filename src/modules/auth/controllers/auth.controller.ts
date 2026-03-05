@@ -2,6 +2,7 @@ import { AuthService } from '../services/auth.service';
 import {
     Body,
     Controller,
+    Get,
     Post,
     Req,
     Res,
@@ -32,7 +33,7 @@ export class AuthController {
     @ApiBody({ type: LoginDto })
     @DocResponse({ serialization: AuthResponseDto, isPublic: true })
     @Public()
-    @ApiOperation({ summary: '用户登录', description: '用户登录' })
+    @ApiOperation({ summary: '用户登录' })
     async login(
         @ReqUser() user: User,
         @Res({ passthrough: true }) res: Response
@@ -56,8 +57,15 @@ export class AuthController {
         return { accessToken };
     }
 
+    @Get('/me')
+    @ApiOperation({ summary: '获取当前用户' })
+    @DocResponse({ serialization: UserDto })
+    async me(@ReqUser() user: User): Promise<UserDto> {
+        return await this.authService.me(user.id);
+    }
+
     @Post('register')
-    @ApiOperation({ summary: '用户注册', description: '用户注册' })
+    @ApiOperation({ summary: '用户注册' })
     @DocResponse({ serialization: UserDto, isPublic: true })
     @Public()
     async register(@Body() registerDto: CreateUserDto): Promise<UserDto> {
@@ -65,7 +73,7 @@ export class AuthController {
     }
 
     @Post('refreshToken')
-    @ApiOperation({ summary: '刷新令牌', description: '刷新令牌' })
+    @ApiOperation({ summary: '刷新令牌' })
     @DocResponse({ serialization: AuthResponseDto, isPublic: true })
     @Public()
     async refreshToken(@Req() request: Request) {

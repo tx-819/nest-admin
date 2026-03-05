@@ -44,6 +44,12 @@ export class TokenService {
     }
 
     async createRefreshToken(user: User) {
+        const oldTokenHash = await this.cacheService.get<string>(
+            `refresh_token:${user.id}`
+        );
+        if (oldTokenHash) {
+            await this.cacheService.del(`refresh_token_lookup:${oldTokenHash}`);
+        }
         const refreshToken = randomBytes(32).toString('base64url');
         const ttl = this.configService.get<number>('auth.refreshToken.ttl');
         const tokenHash = createHash('sha256')
@@ -59,7 +65,9 @@ export class TokenService {
     }
 
     /** 通过 refreshToken 查出 userId，用于刷新接口未带 JWT 时 */
-    async getUserIdByRefreshToken(refreshToken: string): Promise<number | null> {
+    async getUserIdByRefreshToken(
+        refreshToken: string
+    ): Promise<number | null> {
         const tokenHash = createHash('sha256')
             .update(refreshToken)
             .digest('hex');

@@ -13,9 +13,12 @@ import { UserService } from '../services/user.service';
 import { PaginationParamsDto } from 'src/common/helper/dtos';
 import { ApiOperation } from '@nestjs/swagger';
 import { DocPaginatedResponse } from 'src/common/doc/decorators/doc.paginated.decorator';
-import { UpdateUserDto, UserDto } from '../dtos/user.dto';
+import {
+    CreateUserDto,
+    UpdateUserDto,
+    UserWithRolesDto,
+} from '../dtos/user.dto';
 import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
-import { CreateUserDto } from '../dtos/user.dto';
 import { DocResponse } from 'src/common/doc/decorators/doc.response.decorator';
 
 @Controller('user')
@@ -24,10 +27,10 @@ export class UserController {
 
     @Get()
     @ApiOperation({ summary: '获取用户列表' })
-    @DocPaginatedResponse({ serialization: UserDto })
+    @DocPaginatedResponse({ serialization: UserWithRolesDto })
     async getUsers(
         @Query() query: PaginationParamsDto
-    ): Promise<ApiPaginatedDataDto<UserDto>> {
+    ): Promise<ApiPaginatedDataDto<UserWithRolesDto>> {
         return await this.userService.getUsers(query);
     }
 

@@ -69,4 +69,12 @@ export class AuthService {
             accessToken,
         };
     }
+
+    async me(userId: number): Promise<UserDto> {
+        const user = await this.userService.detailWithRoles(userId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        return user;
+    }
 }

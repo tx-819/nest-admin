@@ -1,16 +1,20 @@
 import { faker } from '@faker-js/faker';
 import { ApiHideProperty, ApiProperty, PartialType } from '@nestjs/swagger';
 import { User } from 'src/generated/prisma/client';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import {
     IsEmail,
     IsBoolean,
     IsOptional,
     IsString,
     IsNotEmpty,
+    IsArray,
+    ValidateNested,
+    IsInt,
 } from 'class-validator';
 import { BaseDto } from 'src/common/helper/dtos';
 import { PickType } from '@nestjs/swagger';
+import { RoleDto } from 'src/modules/role/dtos/role.dto';
 
 export class UserDto extends BaseDto implements User {
     @ApiProperty({
@@ -65,6 +69,14 @@ export class CreateUserDto extends PickType(UserDto, [
     @IsString()
     @IsNotEmpty()
     password: string;
+
+    @ApiProperty({
+        example: [1],
+    })
+    @IsArray()
+    @IsInt({ each: true })
+    @IsOptional()
+    rolesIds: number[];
 }
 
 export class UpdateUserDto extends PickType(UserDto, [
@@ -72,4 +84,22 @@ export class UpdateUserDto extends PickType(UserDto, [
     'email',
     'avatar',
     'status',
-]) {}
+]) {
+    @ApiProperty({
+        example: [1],
+    })
+    @IsArray()
+    @IsInt({ each: true })
+    @IsOptional()
+    rolesIds: number[];
+}
+
+export class UserWithRolesDto extends UserDto {
+    @ApiProperty({
+        type: [RoleDto],
+    })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => RoleDto)
+    roles: RoleDto[];
+}
