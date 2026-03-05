@@ -17,7 +17,7 @@ import { IHelperPaginationService } from '../interfaces/pagination.service.inter
  * ```typescript
  * const result = await this.paginationService.paginate(
  *   this.databaseService.user,
- *   { page: 1, limit: 10 },
+ *   { page: 1, pageSize: 10 },
  *   {
  *     where: { role: 'USER' },
  *     include: { posts: true },
@@ -45,11 +45,11 @@ export class HelperPaginationService implements IHelperPaginationService {
      */
     async paginate<T>(
         delegate: PrismaDelegate,
-        { current = 1, pageSize = this.DEFAULT_LIMIT }: IPaginationParams,
+        { page = 1, pageSize = this.DEFAULT_LIMIT }: IPaginationParams,
         options: IPrismaQueryOptions = {}
     ): Promise<ApiPaginatedDataDto<T>> {
         // Validate and sanitize inputs
-        const currentPage = Math.max(1, current);
+        const currentPage = Math.max(1, page);
         const itemsPerPage = Math.min(Math.max(1, pageSize), this.MAX_LIMIT);
         const skip = (currentPage - 1) * itemsPerPage;
 
@@ -70,7 +70,7 @@ export class HelperPaginationService implements IHelperPaginationService {
 
             return {
                 metadata: {
-                    current: currentPage,
+                    page,
                     pageSize: itemsPerPage,
                     total: totalItems,
                     totalPages: totalPages,

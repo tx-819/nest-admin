@@ -3,10 +3,10 @@ import { Expose, Type } from 'class-transformer';
 import { IsArray, IsNumber, ValidateNested } from 'class-validator';
 
 export class ApiPaginationMetadataDto {
-    @ApiProperty({ description: 'Current page number', example: 1 })
+    @ApiProperty({ description: 'Page number', example: 1 })
     @Expose()
     @IsNumber()
-    current: number;
+    page: number;
 
     @ApiProperty({ description: 'Number of items per page', example: 10 })
     @Expose()

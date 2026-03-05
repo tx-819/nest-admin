@@ -1,5 +1,5 @@
 export interface IPaginationParams {
-    current: number;
+    page: number;
     pageSize: number;
 }
 

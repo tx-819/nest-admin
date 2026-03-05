@@ -12,7 +12,7 @@ export class PaginationParamsDto implements IPaginationParams {
     @IsInt()
     @Min(1)
     @Transform(({ value }) => Number(value))
-    current: number;
+    page: number;
 
     @ApiProperty({
         example: 10,
