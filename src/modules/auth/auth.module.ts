@@ -11,10 +11,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { CacheModule } from 'src/common/cache/cache.module';
+import { PermissionModule } from '../permission/permission.module';
+import { RoleModule } from '../role/role.module';
 
 @Module({
     imports: [
         UserModule,
+        PermissionModule,
+        RoleModule,
         PassportModule,
         CacheModule,
         JwtModule.registerAsync({

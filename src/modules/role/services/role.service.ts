@@ -1,6 +1,6 @@
 import { PrismaService } from 'src/common/database/services/database.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Permission, Role } from 'src/generated/prisma/client';
+import { Permission, Role, User } from 'src/generated/prisma/client';
 import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
 import {
     CreateRoleDto,
@@ -79,5 +79,13 @@ export class RoleService {
                 })),
             });
         }
+    }
+
+    async getRolesByUser(user: User): Promise<Role[]> {
+        const roles = await this.prisma.userRole.findMany({
+            where: { userId: user.id },
+            include: { role: true },
+        });
+        return roles.map(r => r.role);
     }
 }

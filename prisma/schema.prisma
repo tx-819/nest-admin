@@ -22,6 +22,7 @@ model User {
   password  String
   nickname  String?
   avatar    String?
+  isSuper   Boolean    @default(false) @map("is_super")
   status    Boolean    @default(true)
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")

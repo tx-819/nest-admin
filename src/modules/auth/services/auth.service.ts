@@ -8,12 +8,19 @@ import { UserService } from 'src/modules/user/services/user.service';
 import { TokenService } from './token.service';
 import { CreateUserDto, UserDto } from 'src/modules/user/dtos/user.dto';
 import { compare, hash } from 'bcrypt';
+import { RoleService } from 'src/modules/role/services/role.service';
+import { User } from 'src/generated/prisma/client';
+import { MenuTreeDto } from 'src/modules/permission/dtos/menu.dto';
+import { PermissionService } from 'src/modules/permission/services/permission.service';
+import { uniqBy } from 'lodash';
 
 @Injectable()
 export class AuthService {
     constructor(
         private userService: UserService,
-        private tokenService: TokenService
+        private tokenService: TokenService,
+        private roleService: RoleService,
+        private permissionService: PermissionService
     ) {}
 
     async createToken(userId: number): Promise<{
@@ -70,5 +77,20 @@ export class AuthService {
 
     async me(userId: number): Promise<UserDto> {
         return this.userService.detailWithRoles(userId);
+    }
+
+    async getMenuTreeByUser(user: User): Promise<MenuTreeDto[]> {
+        if (user.isSuper) {
+            const permissions =
+                await this.permissionService.getAllPermissions();
+            return this.permissionService.buildMenuTrees(permissions);
+        }
+        const roles = await this.roleService.getRolesByUser(user);
+        if (roles.length === 0) return [];
+        const roleIds = roles.map(r => r.id);
+        const permissions =
+            await this.permissionService.getPermissionsByRoles(roleIds);
+        const uniquePermissions = uniqBy(permissions, 'id');
+        return this.permissionService.buildMenuTrees(uniquePermissions);
     }
 }

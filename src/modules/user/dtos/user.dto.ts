@@ -55,6 +55,13 @@ export class UserDto extends BaseDto implements User {
     @ApiHideProperty()
     @Exclude()
     password: string;
+
+    @ApiProperty({
+        example: faker.helpers.arrayElement([true, false]),
+    })
+    @IsBoolean()
+    @IsOptional()
+    isSuper: boolean;
 }
 
 export class CreateUserDto extends PickType(UserDto, [

@@ -11,6 +11,8 @@ import {
     PERMISSION_TYPE_ACTION,
     PERMISSION_TYPE_MENU,
 } from '../dtos/permission.dto';
+import { AuthListDto, MenuTreeDto } from '../dtos/menu.dto';
+import { filter, groupBy, map as mapLodash, sortBy } from 'lodash';
 
 @Injectable()
 export class PermissionService {
@@ -44,6 +46,10 @@ export class PermissionService {
             throw new NotFoundException('Permission not found');
         }
         return permission;
+    }
+
+    async getAllPermissions(): Promise<Permission[]> {
+        return await this.prisma.permission.findMany();
     }
 
     async create(createDto: CreatePermissionDto): Promise<void> {
@@ -99,7 +105,10 @@ export class PermissionService {
         if (dto.icon !== undefined) data.icon = dto.icon;
         if (dto.component !== undefined) data.component = dto.component;
         if (dto.orderNo !== undefined) data.orderNo = dto.orderNo;
-        if (dto.permissionType === PERMISSION_TYPE_ACTION && dto.code !== undefined) {
+        if (
+            dto.permissionType === PERMISSION_TYPE_ACTION &&
+            dto.code !== undefined
+        ) {
             data.code = dto.code;
         } else if (dto.permissionType === PERMISSION_TYPE_MENU) {
             data.code = null;
@@ -111,5 +120,48 @@ export class PermissionService {
                     : { disconnect: true };
         }
         return data;
+    }
+
+    async getPermissionsByRoles(roleIds: number[]): Promise<Permission[]> {
+        const list = await this.prisma.rolePermission.findMany({
+            where: { roleId: { in: roleIds } },
+            include: { permission: true },
+        });
+        return list.map(item => item.permission);
+    }
+
+    buildMenuTrees(permissions: Permission[]): MenuTreeDto[] {
+        const menus = sortBy(
+            filter(permissions, p => p.permissionType === PERMISSION_TYPE_MENU),
+            ['orderNo', 'id']
+        );
+        const actions = filter(
+            permissions,
+            p => p.permissionType === PERMISSION_TYPE_ACTION
+        );
+        const menusByParentId = groupBy(menus, p => p.parentId ?? 'null');
+        const actionsByParentId = groupBy(actions, p => p.parentId ?? 'null');
+        return this.buildMenuTree('null', menusByParentId, actionsByParentId);
+    }
+
+    private buildMenuTree(
+        parentKey: string,
+        menusByParentId: Record<string, Permission[]>,
+        actionsByParentId: Record<string, Permission[]>
+    ): MenuTreeDto[] {
+        const menus = menusByParentId[parentKey] ?? [];
+        return mapLodash(menus, menu => {
+            const actions = actionsByParentId[String(menu.id)] ?? [];
+            const authList: AuthListDto[] = mapLodash(
+                filter(actions, a => a.code != null),
+                a => ({ code: a.code!, name: a.name })
+            );
+            const children = this.buildMenuTree(
+                String(menu.id),
+                menusByParentId,
+                actionsByParentId
+            );
+            return { ...menu, authList, children };
+        });
     }
 }

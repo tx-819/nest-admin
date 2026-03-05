@@ -30,7 +30,7 @@ export class PermissionDto extends BaseDto implements Permission {
     @IsOptional()
     code: string | null;
 
-    @ApiProperty({ required: false, nullable: true })
+    @ApiProperty({ example: '', required: false, nullable: true })
     @IsString()
     @IsOptional()
     remark: string | null;
@@ -55,7 +55,7 @@ export class PermissionDto extends BaseDto implements Permission {
     @IsOptional()
     icon: string | null;
 
-    @ApiProperty({ required: false, nullable: true })
+    @ApiProperty({ example: '', required: false, nullable: true })
     @IsString()
     @IsOptional()
     component: string | null;
@@ -65,7 +65,7 @@ export class PermissionDto extends BaseDto implements Permission {
     @IsOptional()
     orderNo: number;
 
-    @ApiProperty({ required: false, nullable: true })
+    @ApiProperty({ example: 0, required: false, nullable: true })
     @IsInt()
     @IsOptional()
     parentId: number | null;

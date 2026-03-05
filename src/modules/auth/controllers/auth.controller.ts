@@ -21,6 +21,7 @@ import { CreateUserDto, UserDto } from 'src/modules/user/dtos/user.dto';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { Public } from '../decorators/public.decorator';
 import { APP_ENVIRONMENT } from 'src/app/enums/app.enum';
+import { MenuTreeDto } from 'src/modules/permission/dtos/menu.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -63,6 +64,13 @@ export class AuthController {
     @DocResponse({ serialization: UserDto })
     me(@ReqUser() user: User): Promise<UserDto> {
         return this.authService.me(user.id);
+    }
+
+    @Get('menus')
+    @ApiOperation({ summary: '获取当前用户拥有的菜单' })
+    @DocResponse({ serialization: MenuTreeDto })
+    getMenus(@ReqUser() user: User): Promise<MenuTreeDto[]> {
+        return this.authService.getMenuTreeByUser(user);
     }
 
     @Post('register')
