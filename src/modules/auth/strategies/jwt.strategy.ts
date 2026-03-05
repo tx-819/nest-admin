@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -27,11 +31,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     /**
-     * 通过荷载解析出用户ID
-     * 通过用户ID查询出用户是否存在,并把id放入request方便后续操作
-     * @param payload
+     * 通过荷载解析出用户ID，查询用户是否存在并放入 request
      */
     async validate(payload: JwtPayload) {
-        return await this.userService.detail(payload.sub);
+        try {
+            return await this.userService.detail(payload.sub);
+        } catch (e) {
+            if (e instanceof NotFoundException) {
+                throw new UnauthorizedException('User no longer exists');
+            }
+            throw e;
+        }
     }
 }

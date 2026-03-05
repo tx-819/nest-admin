@@ -7,7 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
 
-import { LoginDto } from '../dtos/auth.dto.js';
+import { LoginDto } from '../dtos/auth.dto';
 
 /**
  * 用户登录守卫

@@ -28,10 +28,17 @@ export class UserController {
     @Get()
     @ApiOperation({ summary: '获取用户列表' })
     @DocPaginatedResponse({ serialization: UserWithRolesDto })
-    async getUsers(
+    getUsers(
         @Query() query: PaginationParamsDto
     ): Promise<ApiPaginatedDataDto<UserWithRolesDto>> {
-        return await this.userService.getUsers(query);
+        return this.userService.getUsers(query);
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: '获取用户详情' })
+    @DocResponse({ serialization: UserWithRolesDto })
+    getDetail(@Param('id', ParseIntPipe) id: number) {
+        return this.userService.detailWithRoles(id);
     }
 
     @Post()

@@ -77,15 +77,14 @@ model RolePermission {
 model Permission {
   id             Int              @id @default(autoincrement())
   name           String           @db.VarChar(50)
-  code           String           @unique @db.VarChar(50)
+  code           String?          @db.VarChar(50) // action code
   remark         String?          @db.Text
   status         Boolean          @default(true)
-  permissionType String           @map("permission_type") @db.VarChar(50)
+  permissionType String           @map("permission_type") @db.VarChar(50) // menu, action
   path           String?          @db.VarChar(255)
   icon           String?          @db.VarChar(255)
   component      String?          @db.VarChar(255)
   orderNo        Int              @default(0) @map("order_no")
-  method         String?          @db.VarChar(50)
   parentId       Int?             @map("parent_id")
   parent         Permission?      @relation("ParentPermission", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children       Permission[]     @relation("ParentPermission")

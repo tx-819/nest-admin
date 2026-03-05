@@ -55,12 +55,14 @@ export class TokenService {
         const tokenHash = createHash('sha256')
             .update(refreshToken)
             .digest('hex');
-        await this.cacheService.set(`refresh_token:${user.id}`, tokenHash, ttl);
-        await this.cacheService.set(
-            `refresh_token_lookup:${tokenHash}`,
-            String(user.id),
-            ttl
-        );
+        await Promise.all([
+            this.cacheService.set(`refresh_token:${user.id}`, tokenHash, ttl),
+            this.cacheService.set(
+                `refresh_token_lookup:${tokenHash}`,
+                String(user.id),
+                ttl
+            ),
+        ]);
         return refreshToken;
     }
 
@@ -74,6 +76,8 @@ export class TokenService {
         const userIdStr = await this.cacheService.get<string>(
             `refresh_token_lookup:${tokenHash}`
         );
-        return userIdStr ? parseInt(userIdStr, 10) : null;
+        if (!userIdStr) return null;
+        const userId = parseInt(userIdStr, 10);
+        return Number.isNaN(userId) ? null : userId;
     }
 }

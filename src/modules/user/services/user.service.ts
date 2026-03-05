@@ -5,7 +5,6 @@ import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated
 import {
     CreateUserDto,
     UpdateUserDto,
-    UserDto,
     UserWithRolesDto,
 } from '../dtos/user.dto';
 import { HelperPaginationService } from 'src/common/helper/services/helper.pagination.service';
@@ -49,25 +48,26 @@ export class UserService {
     }
 
     async findOne(username: string): Promise<User | null> {
-        const user = await this.prisma.user.findUnique({
+        return this.prisma.user.findUnique({
             where: { username },
         });
-        return user ?? null;
     }
 
-    async create(createDto: CreateUserDto): Promise<UserDto> {
+    async create(createDto: CreateUserDto): Promise<void> {
         const { rolesIds, ...data } = createDto;
-        let dataToCreate: Prisma.UserCreateInput = data;
-        if (rolesIds !== undefined) {
-            dataToCreate.roles = {
-                create: rolesIds.map(roleId => ({
-                    role: { connect: { id: roleId } },
-                })),
-            };
-        }
-        return await this.prisma.user.create({
-            data: dataToCreate,
-        });
+        const dataToCreate: Prisma.UserCreateInput = {
+            ...data,
+            ...(rolesIds?.length
+                ? {
+                      roles: {
+                          create: rolesIds.map(roleId => ({
+                              role: { connect: { id: roleId } },
+                          })),
+                      },
+                  }
+                : {}),
+        };
+        await this.prisma.user.create({ data: dataToCreate });
     }
 
     async update(id: number, updateDto: UpdateUserDto): Promise<void> {
@@ -92,32 +92,21 @@ export class UserService {
     }
 
     async delete(id: number): Promise<void> {
-        await this.prisma.user.delete({
-            where: { id },
-        });
+        await this.detail(id);
+        await this.prisma.user.delete({ where: { id } });
     }
 
     async detailWithRoles(id: number): Promise<UserWithRolesDto> {
         const user = await this.prisma.user.findUnique({
             where: { id },
-            include: { roles: true },
+            include: { roles: { include: { role: true } } },
         });
         if (!user) {
             throw new NotFoundException('User not found');
         }
-        const roleIds = user.roles.map(role => role.roleId);
-        if (roleIds.length === 0) {
-            return {
-                ...user,
-                roles: [],
-            };
-        }
-        const roles = await this.prisma.role.findMany({
-            where: { id: { in: user.roles.map(role => role.roleId) } },
-        });
         return {
             ...user,
-            roles,
+            roles: user.roles.map(r => r.role),
         };
     }
 }

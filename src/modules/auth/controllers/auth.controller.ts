@@ -1,5 +1,6 @@
 import { AuthService } from '../services/auth.service';
 import {
+    BadRequestException,
     Body,
     Controller,
     Get,
@@ -45,7 +46,7 @@ export class AuthController {
             APP_ENVIRONMENT.PRODUCTION;
         const ttl = this.configService.get<number>('auth.refreshToken.ttl');
         if (!ttl) {
-            throw new Error('Refresh token TTL is not set');
+            throw new BadRequestException('Refresh token TTL is not set');
         }
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -60,16 +61,16 @@ export class AuthController {
     @Get('/me')
     @ApiOperation({ summary: '获取当前用户' })
     @DocResponse({ serialization: UserDto })
-    async me(@ReqUser() user: User): Promise<UserDto> {
-        return await this.authService.me(user.id);
+    me(@ReqUser() user: User): Promise<UserDto> {
+        return this.authService.me(user.id);
     }
 
     @Post('register')
     @ApiOperation({ summary: '用户注册' })
     @DocResponse({ serialization: UserDto, isPublic: true })
     @Public()
-    async register(@Body() registerDto: CreateUserDto): Promise<UserDto> {
-        return await this.authService.register(registerDto);
+    register(@Body() registerDto: CreateUserDto): Promise<UserDto> {
+        return this.authService.register(registerDto);
     }
 
     @Post('refreshToken')
@@ -77,11 +78,10 @@ export class AuthController {
     @DocResponse({ serialization: AuthResponseDto, isPublic: true })
     @Public()
     async refreshToken(@Req() request: Request) {
-        const _refreshToken = request.cookies?.refreshToken;
-        if (!_refreshToken) {
+        const refreshToken = request.cookies?.refreshToken;
+        if (!refreshToken) {
             throw new UnauthorizedException('Refresh token not found');
         }
-        const accessToken = await this.authService.refreshToken(_refreshToken);
-        return { accessToken };
+        return this.authService.refreshToken(refreshToken);
     }
 }
