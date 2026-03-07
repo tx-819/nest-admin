@@ -66,16 +66,9 @@ export class HelperPaginationService implements IHelperPaginationService {
                 }),
             ]);
 
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-
             return {
-                metadata: {
-                    page,
-                    pageSize: itemsPerPage,
-                    total: totalItems,
-                    totalPages: totalPages,
-                },
-                items,
+                list: items,
+                total: totalItems,
             };
         } catch (error) {
             this.logger.error(`Pagination failed: ${error.message}`);

@@ -8,7 +8,7 @@ export class ApiErrorResponseDto implements IApiErrorResponse {
     @ApiProperty({ description: 'HTTP status code', example: 200 })
     @Expose()
     @IsNumber()
-    statusCode: number;
+    code: number;
 
     @ApiProperty({
         description: 'Response message',
@@ -26,8 +26,8 @@ export class ApiErrorResponseDto implements IApiErrorResponse {
     @Type(() => Date)
     timestamp: string;
 
-    constructor(statusCode: number, message: string, timestamp: string) {
-        this.statusCode = statusCode;
+    constructor(code: number, message: string, timestamp: string) {
+        this.code = code;
         this.message = message;
         this.timestamp = timestamp;
     }

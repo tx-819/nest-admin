@@ -25,7 +25,7 @@ import { DocResponse } from 'src/common/doc/decorators/doc.response.decorator';
 export class UserController {
     constructor(private userService: UserService) {}
 
-    @Get()
+    @Get('/page')
     @ApiOperation({ summary: '获取用户列表' })
     @DocPaginatedResponse({ serialization: UserWithRolesDto })
     getUsers(

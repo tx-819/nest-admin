@@ -28,9 +28,10 @@ export class UserService {
                 roles: { include: { role: true } },
             },
         });
+        console.log('result===', result);
         return {
             ...result,
-            items: result.items.map(({ roles, ...user }) => ({
+            list: result.list.map(({ roles, ...user }) => ({
                 ...user,
                 roles: roles.map(r => r.role),
             })),

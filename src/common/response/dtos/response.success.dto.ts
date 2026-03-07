@@ -8,7 +8,7 @@ export class ApiSuccessResponseDto<T> implements IApiSuccessResponse<T> {
     @ApiProperty({ description: 'HTTP status code', example: 200 })
     @Expose()
     @IsNumber()
-    statusCode: number;
+    code: number;
 
     @ApiProperty({
         description: 'Response message',
@@ -32,13 +32,8 @@ export class ApiSuccessResponseDto<T> implements IApiSuccessResponse<T> {
     @IsOptional()
     data: T;
 
-    constructor(
-        statusCode: number,
-        message: string,
-        timestamp: string,
-        data: T
-    ) {
-        this.statusCode = statusCode;
+    constructor(code: number, message: string, timestamp: string, data: T) {
+        this.code = code;
         this.message = message;
         this.timestamp = timestamp;
         this.data = data;

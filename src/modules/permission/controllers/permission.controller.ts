@@ -22,7 +22,7 @@ import {
 export class PermissionController {
     constructor(private permissionService: PermissionService) {}
 
-    @Get()
+    @Get('/tree')
     @ApiOperation({ summary: '获取权限树（不分页）' })
     @DocResponse({ serialization: PermissionTreeDto })
     getTree(): Promise<PermissionTreeDto[]> {

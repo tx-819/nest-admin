@@ -8,7 +8,7 @@ export interface IPaginationMetadata {
 }
 
 interface IApiBaseResponse {
-    statusCode: number;
+    code: number;
     message: string;
     timestamp: string;
 }

@@ -41,14 +41,14 @@ export class ResponseInterceptor
             );
         }
         // 如果是分页数据,则对items中的每一项进行序列化
-        if ('metadata' in response && 'items' in response) {
-            const items =
-                !isNil(response.items) && isArray(response.items)
-                    ? response.items
+        if ('list' in response && 'total' in response) {
+            const list =
+                !isNil(response.list) && isArray(response.list)
+                    ? response.list
                     : [];
             return {
                 ...response,
-                items: (items as PlainLiteralObject[]).map(item => {
+                list: (list as PlainLiteralObject[]).map(item => {
                     return !isObject(item)
                         ? item
                         : this.transformToPlain(item, options);

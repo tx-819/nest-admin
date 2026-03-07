@@ -27,7 +27,7 @@ import { PermissionDto } from 'src/modules/permission/dtos/permission.dto';
 export class RoleController {
     constructor(private roleService: RoleService) {}
 
-    @Get()
+    @Get('/page')
     @ApiOperation({ summary: '获取角色列表' })
     @DocPaginatedResponse({ serialization: RoleDto })
     getRoles(

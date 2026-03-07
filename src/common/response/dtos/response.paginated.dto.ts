@@ -29,10 +29,10 @@ export class ApiPaginatedDataDto<T> {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => Object)
-    items: T[];
+    list: T[];
 
-    @ApiProperty({ description: 'Pagination metadata' })
-    @ValidateNested()
-    @Type(() => ApiPaginationMetadataDto)
-    metadata: ApiPaginationMetadataDto;
+    @ApiProperty({ description: 'Total number of items', example: 100 })
+    @Expose()
+    @IsNumber()
+    total: number;
 }

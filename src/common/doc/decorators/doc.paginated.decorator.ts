@@ -12,7 +12,6 @@ import {
 } from 'src/common/response/dtos/response.paginated.dto';
 import { ApiSuccessResponseDto } from 'src/common/response/dtos/response.success.dto';
 import { IResponseDocOptions } from 'src/common/response/interfaces/response.interface';
-import { IS_PUBLIC_KEY } from 'src/modules/auth/decorators/public.decorator';
 
 export function DocPaginatedResponse<T>(
     options?: IResponseDocOptions<T>
@@ -36,14 +35,15 @@ export function DocPaginatedResponse<T>(
                     data: {
                         type: 'object',
                         properties: {
-                            items: {
+                            list: {
                                 type: 'array',
                                 items: serialization
                                     ? { $ref: getSchemaPath(serialization) }
                                     : {},
                             },
-                            metadata: {
-                                $ref: getSchemaPath(ApiPaginationMetadataDto),
+                            total: {
+                                type: 'number',
+                                example: 100,
                             },
                         },
                     },
