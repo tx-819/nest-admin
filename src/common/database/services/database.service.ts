@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { PrismaClient } from 'src/generated/prisma/client';
 
+const DEFAULT_RETRY_ATTEMPTS = 10;
+const RETRY_DELAY_MS = 2000;
+
 function parseDatabaseUrl(url: string) {
     const u = new URL(url);
     const database = u.pathname.replace(/^\//, '') || undefined;
@@ -18,6 +21,10 @@ function parseDatabaseUrl(url: string) {
     };
 }
 
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 @Injectable()
 export class PrismaService
     extends PrismaClient
@@ -25,6 +32,7 @@ export class PrismaService
 {
     constructor(private readonly configService: ConfigService) {
         const url = configService.get<string>('database.url')!;
+        console.log('url', url);
         const poolConfig = parseDatabaseUrl(url);
         const adapter = new PrismaMariaDb(poolConfig, {
             onConnectionError: err => {
@@ -38,7 +46,29 @@ export class PrismaService
     }
 
     async onModuleInit() {
-        await this.$connect();
+        const maxAttempts =
+            Number(process.env.DB_CONNECT_RETRY_ATTEMPTS) ||
+            DEFAULT_RETRY_ATTEMPTS;
+        const delayMs =
+            Number(process.env.DB_CONNECT_RETRY_DELAY_MS) || RETRY_DELAY_MS;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                await this.$connect();
+                return;
+            } catch (err) {
+                const message =
+                    err instanceof Error ? err.message : String(err);
+                console.warn(
+                    `[PrismaService] Database connection attempt ${attempt}/${maxAttempts} failed:`,
+                    message
+                );
+                if (attempt === maxAttempts) {
+                    throw err;
+                }
+                await sleep(delayMs);
+            }
+        }
     }
 
     async onModuleDestroy() {
