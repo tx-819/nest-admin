@@ -12,6 +12,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { CacheModule } from 'src/common/cache/cache.module';
+import { EmailModule } from 'src/common/email/email.module';
 import { PermissionModule } from '../permission/permission.module';
 import { RoleModule } from '../role/role.module';
 import { QueueModule } from 'src/common/queue/queue.module';
@@ -23,6 +24,7 @@ import { QueueModule } from 'src/common/queue/queue.module';
         RoleModule,
         PassportModule,
         CacheModule,
+        EmailModule,
         QueueModule,
         JwtModule.registerAsync({
             useFactory: (configService: ConfigService) => ({

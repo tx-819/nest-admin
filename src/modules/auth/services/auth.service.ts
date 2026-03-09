@@ -17,6 +17,7 @@ import { SendLoginEmailDto } from '../dtos/auth.dto';
 import { EmailQueueService } from 'src/common/queue/services/email-queue.service';
 import { ConfigService } from '@nestjs/config';
 import { renderMagicLoginEmail } from 'src/common/email/templates/magic-login.template';
+import { EmailService } from 'src/common/email/services/email.service';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,8 @@ export class AuthService {
         private roleService: RoleService,
         private permissionService: PermissionService,
         private emailQueueService: EmailQueueService,
-        private configService: ConfigService
+        private configService: ConfigService,
+        private emailService: EmailService
     ) {}
 
     async createToken(userId: number): Promise<{
@@ -106,6 +108,11 @@ export class AuthService {
         if (!user) {
             throw new NotFoundException('User not found');
         }
+
+        await this.emailService.checkSendRateLimit(email, {
+            keyPrefix: 'ratelimit:login-email:',
+        });
+
         const token = await this.tokenService.generateLoginToken(user);
         const magicLoginTtl =
             this.configService.get<number>('auth.magicLoginToken.ttl') ??
