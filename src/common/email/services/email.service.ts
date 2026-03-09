@@ -74,8 +74,13 @@ export class EmailService implements OnModuleDestroy {
             });
             this.logger.debug(`Email sent: ${info.messageId} to ${to}`);
             return info.messageId;
-        } catch (err) {
-            this.logger.error(`Failed to send email to ${to}:`, err);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            const code = err && typeof err === 'object' && 'code' in err ? (err as { code?: string }).code : undefined;
+            const response = err && typeof err === 'object' && 'response' in err ? (err as { response?: string }).response : undefined;
+            this.logger.error(
+                `Failed to send email to ${to}: ${message}${code ? ` (code: ${code})` : ''}${response ? ` response: ${response}` : ''}`
+            );
             throw err;
         }
     }

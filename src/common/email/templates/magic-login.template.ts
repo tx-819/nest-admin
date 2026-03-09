@@ -23,23 +23,21 @@ export function renderMagicLoginEmail(
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f4f5; padding: 40px 20px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06); overflow: hidden;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); overflow: hidden;">
           <tr>
-            <td style="padding: 40px 32px 24px; text-align: center;">
-              <div style="width: 48px; height: 48px; margin: 0 auto 20px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 12px;"></div>
-              <h1 style="margin: 0; font-size: 22px; font-weight: 600; color: #18181b;">一键登录</h1>
-              <p style="margin: 12px 0 0; font-size: 15px; color: #71717a;">点击下方按钮使用本链接登录您的账号</p>
+            <td style="padding: 36px 32px 24px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+              <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #1f2937;">一键登录</h1>
+              <p style="margin: 10px 0 0; font-size: 14px; color: #6b7280;">点击下方按钮使用本链接登录您的账号</p>
             </td>
           </tr>
           <tr>
-            <td style="padding: 8px 32px 32px; text-align: center;">
-              <a href="${loginUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 8px;">前往登录</a>
+            <td style="padding: 28px 32px 32px; text-align: center;">
+              <a href="${loginUrl}" style="display: inline-block; padding: 12px 28px; background-color: #4f46e5; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 8px;">前往登录</a>
             </td>
           </tr>
           <tr>
-            <td style="padding: 0 32px 32px; text-align: center;">
-              <p style="margin: 0; font-size: 13px; color: #a1a1aa;">该链接 ${expiresInMinutes} 分钟内有效</p>
-              <p style="margin: 8px 0 0; font-size: 13px; color: #a1a1aa;">若非本人操作，请忽略此邮件</p>
+            <td style="padding: 0 32px 28px; text-align: center;">
+              <p style="margin: 0; font-size: 13px; color: #9ca3af;">该链接 ${expiresInMinutes} 分钟内有效，若非本人操作请忽略此邮件。</p>
             </td>
           </tr>
         </table>
