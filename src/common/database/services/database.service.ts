@@ -32,7 +32,6 @@ export class PrismaService
 {
     constructor(private readonly configService: ConfigService) {
         const url = configService.get<string>('database.url')!;
-        console.log('url', url);
         const poolConfig = parseDatabaseUrl(url);
         const adapter = new PrismaMariaDb(poolConfig, {
             onConnectionError: err => {

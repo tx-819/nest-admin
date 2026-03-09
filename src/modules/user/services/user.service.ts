@@ -54,6 +54,12 @@ export class UserService {
         });
     }
 
+    async findOneByEmail(email: string): Promise<User | null> {
+        return this.prisma.user.findUnique({
+            where: { email },
+        });
+    }
+
     async create(createDto: CreateUserDto): Promise<void> {
         const { rolesIds, ...data } = createDto;
         const dataToCreate: Prisma.UserCreateInput = {

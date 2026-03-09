@@ -13,7 +13,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import type { Response, Request } from 'express';
 import { LocalAuthGuard } from '../guards/local.auth.guard';
-import { AuthResponseDto, LoginDto } from '../dtos/auth.dto';
+import { MagicLoginAuthGuard } from '../guards/magic-login.auth.guard';
+import { AuthResponseDto, LoginDto, SendLoginEmailDto } from '../dtos/auth.dto';
 import { ReqUser } from '../decorators/user-request.decorator';
 import type { User } from 'src/generated/prisma/client';
 import { DocResponse } from 'src/common/doc/decorators/doc.response.decorator';
@@ -91,5 +92,43 @@ export class AuthController {
             throw new UnauthorizedException('Refresh token not found');
         }
         return this.authService.refreshToken(refreshToken);
+    }
+
+    @Post('sendLoginEmail')
+    @ApiOperation({ summary: '发送登录邮件' })
+    @DocResponse({ isPublic: true })
+    @Public()
+    async sendLoginEmail(@Body() sendLoginEmailDto: SendLoginEmailDto) {
+        return this.authService.sendLoginEmail(sendLoginEmailDto);
+    }
+
+    @Get('magic-login')
+    @UseGuards(MagicLoginAuthGuard)
+    @ApiOperation({ summary: '一键登录' })
+    @DocResponse({ serialization: AuthResponseDto, isPublic: true })
+    @Public()
+    async magicLogin(
+        @ReqUser() user: User,
+        @Res({ passthrough: true }) res: Response
+    ) {
+        const { accessToken, refreshToken } =
+            await this.authService.createToken(user.id);
+        const isProduction =
+            this.configService.get<string>('app.env') ===
+            APP_ENVIRONMENT.PRODUCTION;
+        const ttl = this.configService.get<number>('auth.refreshToken.ttl');
+        if (!ttl) {
+            throw new BadRequestException('Refresh token TTL is not set');
+        }
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'strict' : 'lax',
+            maxAge: ttl * 1000,
+            path: '/',
+        });
+        res.redirect(
+            `${this.configService.get<string>('app.frontendUrl')}/login-success?accessToken=${accessToken}`
+        );
     }
 }

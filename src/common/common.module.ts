@@ -6,6 +6,8 @@ import { ResponseModule } from './response/response.module';
 import { DatabaseModule } from './database/database.module';
 import { RequestModule } from './request/request.module';
 import { CacheModule } from './cache/cache.module';
+import { EmailModule } from './email/email.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
     imports: [
@@ -20,7 +22,9 @@ import { CacheModule } from './cache/cache.module';
         RequestModule,
         CacheModule,
         DatabaseModule,
+        EmailModule,
+        QueueModule,
     ],
-    exports: [DatabaseModule],
+    exports: [DatabaseModule, EmailModule, QueueModule],
 })
 export class CommonModule {}

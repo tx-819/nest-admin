@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { UserDto } from 'src/modules/user/dtos/user.dto';
 import { Type } from 'class-transformer';
 
@@ -24,4 +24,11 @@ export class AuthResponseDto {
     @ApiProperty({ description: '用户信息' })
     @Type(() => UserDto)
     user: UserDto;
+}
+
+export class SendLoginEmailDto {
+    @ApiProperty({ description: '邮箱', example: 'test@example.com' })
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
 }

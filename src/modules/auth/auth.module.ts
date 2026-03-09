@@ -4,6 +4,7 @@ import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
+import { MagicLoginStrategy } from './strategies/magic-login.strategy';
 import { TokenService } from './services/token.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +14,7 @@ import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { CacheModule } from 'src/common/cache/cache.module';
 import { PermissionModule } from '../permission/permission.module';
 import { RoleModule } from '../role/role.module';
+import { QueueModule } from 'src/common/queue/queue.module';
 
 @Module({
     imports: [
@@ -21,6 +23,7 @@ import { RoleModule } from '../role/role.module';
         RoleModule,
         PassportModule,
         CacheModule,
+        QueueModule,
         JwtModule.registerAsync({
             useFactory: (configService: ConfigService) => ({
                 secret: configService.get<string>('auth.accessToken.secret'),
@@ -37,6 +40,7 @@ import { RoleModule } from '../role/role.module';
         TokenService,
         LocalStrategy,
         JwtStrategy,
+        MagicLoginStrategy,
         {
             provide: APP_GUARD,
             useClass: JwtAuthGuard,

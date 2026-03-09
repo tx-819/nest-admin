@@ -22,6 +22,24 @@ export class TokenService {
         };
     }
 
+    async generateLoginToken(user: User) {
+        const token = randomBytes(32).toString('base64url');
+        const ttl = this.configService.get<number>('auth.magicLoginToken.ttl');
+        await this.cacheService.set(`magic_login_token:${token}`, user.id, ttl);
+        return token;
+    }
+
+    /**
+     * 校验并消费魔法链接 token（一次性），返回 userId，无效或已使用返回 null
+     */
+    async consumeMagicLoginToken(token: string): Promise<number | null> {
+        const key = `magic_login_token:${token}`;
+        const userId = await this.cacheService.get<number>(key);
+        if (userId == null) return null;
+        await this.cacheService.del(key);
+        return typeof userId === 'number' ? userId : parseInt(String(userId), 10) || null;
+    }
+
     async createAccessToken(user: User) {
         return this.jwtService.sign({
             sub: user.id,

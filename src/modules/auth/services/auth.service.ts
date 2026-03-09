@@ -13,6 +13,10 @@ import { User } from 'src/generated/prisma/client';
 import { MenuTreeDto } from 'src/modules/permission/dtos/menu.dto';
 import { PermissionService } from 'src/modules/permission/services/permission.service';
 import { uniqBy } from 'lodash';
+import { SendLoginEmailDto } from '../dtos/auth.dto';
+import { EmailQueueService } from 'src/common/queue/services/email-queue.service';
+import { ConfigService } from '@nestjs/config';
+import { renderMagicLoginEmail } from 'src/common/email/templates/magic-login.template';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +24,9 @@ export class AuthService {
         private userService: UserService,
         private tokenService: TokenService,
         private roleService: RoleService,
-        private permissionService: PermissionService
+        private permissionService: PermissionService,
+        private emailQueueService: EmailQueueService,
+        private configService: ConfigService
     ) {}
 
     async createToken(userId: number): Promise<{
@@ -92,5 +98,27 @@ export class AuthService {
             await this.permissionService.getPermissionsByRoles(roleIds);
         const uniquePermissions = uniqBy(permissions, 'id');
         return this.permissionService.buildMenuTrees(uniquePermissions);
+    }
+
+    async sendLoginEmail(sendLoginEmailDto: SendLoginEmailDto): Promise<void> {
+        const { email } = sendLoginEmailDto;
+        const user = await this.userService.findOneByEmail(email);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        const token = await this.tokenService.generateLoginToken(user);
+        const magicLoginTtl =
+            this.configService.get<number>('auth.magicLoginToken.ttl') ??
+            60 * 5;
+        const appHost = this.configService.get<string>('app.host');
+        const appPort = this.configService.get<number>('app.port');
+        await this.emailQueueService.addMail({
+            to: email,
+            subject: '一键登录',
+            html: renderMagicLoginEmail({
+                loginUrl: `http://${appHost}:${appPort}/auth/magic-login?token=${token}`,
+                expiresInMinutes: Math.floor(magicLoginTtl / 60),
+            }),
+        });
     }
 }
