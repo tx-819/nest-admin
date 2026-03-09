@@ -9,8 +9,10 @@ export default registerAs('email', () => ({
     from: process.env.SMTP_FROM || 'noreply@localhost',
     // 邮件发送限流（可按场景覆盖）
     rateLimit: {
-        maxAttempts: parseInt(process.env.EMAIL_RATE_LIMIT_MAX ?? '3', 10) || 1,
-        windowSeconds:
-            parseInt(process.env.EMAIL_RATE_LIMIT_WINDOW ?? '60', 10) || 60,
+        maxAttempts: parseInt(process.env.EMAIL_RATE_LIMIT_MAX ?? '1', 10),
+        windowSeconds: parseInt(
+            process.env.EMAIL_RATE_LIMIT_WINDOW ?? '60',
+            10
+        ),
     },
 }));
