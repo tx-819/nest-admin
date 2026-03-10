@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { ApiHideProperty, ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/generated/prisma/client';
 import { Exclude, Type } from 'class-transformer';
 import {
