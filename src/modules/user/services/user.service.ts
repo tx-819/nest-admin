@@ -8,8 +8,8 @@ import {
     UserWithRolesDto,
 } from '../dtos/user.dto';
 import { HelperPaginationService } from 'src/common/helper/services/helper.pagination.service';
-import { PaginationParamsDto } from 'src/common/helper/dtos';
 import { Prisma } from 'src/generated/prisma/client';
+import { UserListQueryDto } from '../dtos/user.dto';
 
 @Injectable()
 export class UserService {
@@ -19,14 +19,33 @@ export class UserService {
     ) {}
 
     async getUsers(
-        query: PaginationParamsDto
+        query: UserListQueryDto
     ): Promise<ApiPaginatedDataDto<UserWithRolesDto>> {
+        const { username, nickname, ...pagination } = query;
+        const where: Prisma.UserWhereInput = {
+            ...(username
+                ? {
+                      username: {
+                          contains: username,
+                      },
+                  }
+                : {}),
+            ...(nickname
+                ? {
+                      nickname: {
+                          contains: nickname,
+                      },
+                  }
+                : {}),
+        };
+
         const result = await this.helperPaginationService.paginate<
             User & { roles: { role: Role }[] }
-        >(this.prisma.user, query, {
+        >(this.prisma.user, pagination, {
             include: {
                 roles: { include: { role: true } },
             },
+            where,
         });
         console.log('result===', result);
         return {

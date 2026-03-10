@@ -12,7 +12,7 @@ import {
     ValidateNested,
     IsInt,
 } from 'class-validator';
-import { BaseDto } from 'src/common/helper/dtos';
+import { BaseDto, PaginationParamsDto } from 'src/common/helper/dtos';
 import { PickType } from '@nestjs/swagger';
 import { RoleDto } from 'src/modules/role/dtos/role.dto';
 
@@ -99,6 +99,26 @@ export class UpdateUserDto extends PickType(UserDto, [
     @IsInt({ each: true })
     @IsOptional()
     rolesIds: number[];
+}
+
+export class UserListQueryDto extends PaginationParamsDto {
+    @ApiProperty({
+        example: faker.internet.username(),
+        required: false,
+        description: '用户名模糊搜索',
+    })
+    @IsString()
+    @IsOptional()
+    username?: string;
+
+    @ApiProperty({
+        example: faker.person.fullName(),
+        required: false,
+        description: '昵称模糊搜索',
+    })
+    @IsString()
+    @IsOptional()
+    nickname?: string;
 }
 
 export class UserWithRolesDto extends UserDto {
