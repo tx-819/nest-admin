@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { BaseDto } from 'src/common/helper/dtos';
 import { PickType } from '@nestjs/swagger';
+import { PaginationParamsDto } from 'src/common/helper/dtos';
 
 export class RoleDto extends BaseDto implements Role {
     @ApiProperty({
@@ -51,6 +52,26 @@ export class CreateRoleDto extends PickType(RoleDto, ['name', 'code', 'remark', 
 }
 
 export class UpdateRoleDto extends PartialType(PickType(RoleDto, ['name', 'code', 'remark', 'status'])) {}
+
+export class RoleListQueryDto extends PaginationParamsDto {
+    @ApiProperty({
+        example: faker.person.jobTitle(),
+        required: false,
+        description: '角色名称模糊搜索',
+    })
+    @IsString()
+    @IsOptional()
+    name?: string;
+
+    @ApiProperty({
+        example: 'admin',
+        required: false,
+        description: '角色代码模糊搜索',
+    })
+    @IsString()
+    @IsOptional()
+    code?: string;
+}
 
 /** 为角色设置权限（会清空该角色原有权限） */
 export class SetRolePermissionsDto {

@@ -6,10 +6,11 @@ import {
     CreateRoleDto,
     UpdateRoleDto,
     RoleDto,
+    RoleListQueryDto,
     SetRolePermissionsDto,
 } from '../dtos/role.dto';
 import { HelperPaginationService } from 'src/common/helper/services/helper.pagination.service';
-import { PaginationParamsDto } from 'src/common/helper/dtos';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class RoleService {
@@ -19,12 +20,29 @@ export class RoleService {
     ) {}
 
     async getRoles(
-        query: PaginationParamsDto
+        query: RoleListQueryDto
     ): Promise<ApiPaginatedDataDto<RoleDto>> {
-        return await this.helperPaginationService.paginate(
-            this.prisma.role,
-            query
-        );
+        const { name, code, ...pagination } = query;
+        const where: Prisma.RoleWhereInput = {
+            ...(name
+                ? {
+                      name: {
+                          contains: name,
+                      },
+                  }
+                : {}),
+            ...(code
+                ? {
+                      code: {
+                          contains: code,
+                      },
+                  }
+                : {}),
+        };
+
+        return await this.helperPaginationService.paginate(this.prisma.role, pagination, {
+            where,
+        });
     }
 
     async detail(id: number): Promise<Role> {

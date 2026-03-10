@@ -10,7 +10,6 @@ import {
     Query,
 } from '@nestjs/common';
 import { RoleService } from '../services/role.service';
-import { PaginationParamsDto } from 'src/common/helper/dtos';
 import { ApiOperation } from '@nestjs/swagger';
 import { DocPaginatedResponse } from 'src/common/doc/decorators/doc.paginated.decorator';
 import {
@@ -18,6 +17,7 @@ import {
     RoleDto,
     SetRolePermissionsDto,
     UpdateRoleDto,
+    RoleListQueryDto,
 } from '../dtos/role.dto';
 import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
 import { DocResponse } from 'src/common/doc/decorators/doc.response.decorator';
@@ -31,7 +31,7 @@ export class RoleController {
     @ApiOperation({ summary: '获取角色列表' })
     @DocPaginatedResponse({ serialization: RoleDto })
     getRoles(
-        @Query() query: PaginationParamsDto
+        @Query() query: RoleListQueryDto
     ): Promise<ApiPaginatedDataDto<RoleDto>> {
         return this.roleService.getRoles(query);
     }
