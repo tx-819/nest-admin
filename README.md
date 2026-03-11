@@ -1,98 +1,196 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Nest Admin
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+基于 NestJS 的后台管理系统后端模板，提供完整的 RBAC 权限管理、用户认证、角色与权限配置等能力。
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 技术栈
 
-## Description
+| 类别   | 技术                                       |
+| ------ | ------------------------------------------ |
+| 框架   | NestJS 11                                  |
+| 数据库 | MySQL + Prisma ORM                         |
+| 缓存   | Redis + ioredis                            |
+| 认证   | JWT + Passport (Local / JWT / Magic Login) |
+| 队列   | BullMQ                                     |
+| 邮件   | Nodemailer                                 |
+| 文档   | Swagger / OpenAPI                          |
+| 日志   | Pino                                       |
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 项目架构
 
-## Project setup
-
-```bash
-$ pnpm install
+```
+nest-admin/
+├── src/
+│   ├── app/                    # 应用入口与配置
+│   │   ├── app.module.ts      # 根模块
+│   │   └── enums/
+│   ├── common/                 # 公共模块
+│   │   ├── cache/             # Redis 缓存
+│   │   ├── configs/           # 配置 (App / DB / Auth / Redis / Email)
+│   │   ├── database/          # Prisma 数据库服务
+│   │   ├── doc/               # Swagger 文档装饰器
+│   │   ├── email/             # 邮件发送
+│   │   ├── helper/            # 分页等工具
+│   │   ├── logger/            # Pino 日志
+│   │   ├── queue/             # BullMQ 队列 (邮件等)
+│   │   ├── request/           # 请求处理
+│   │   └── response/          # 统一响应格式、拦截器、异常过滤
+│   ├── modules/               # 业务模块
+│   │   ├── auth/              # 认证模块
+│   │   ├── user/              # 用户模块
+│   │   ├── role/              # 角色模块
+│   │   └── permission/        # 权限模块
+│   ├── generated/prisma/      # Prisma 生成客户端
+│   ├── main.ts
+│   └── swagger.ts
+├── prisma/
+│   └── schema.prisma          # 数据模型
+└── test/
 ```
 
-## Compile and run the project
+### 架构分层
 
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Controller 层                           │
+│  (Auth / User / Role / Permission 等 REST API)               │
+├─────────────────────────────────────────────────────────────┤
+│                      Service 层                              │
+│  (业务逻辑、Token、权限校验等)                                 │
+├─────────────────────────────────────────────────────────────┤
+│                      Common 层                               │
+│  (Database / Cache / Queue / Email / Response / Logger)      │
+├─────────────────────────────────────────────────────────────┤
+│                      Prisma / MySQL / Redis                  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Run tests
+## 数据模型 (RBAC)
 
-```bash
-# unit tests
-$ pnpm run test
+```
+User ──┬── UserRole ── Role
+       │
+       └── 多对多关联
 
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+Role ──┬── UserRole ── User
+       │
+       └── RolePermission ── Permission (菜单/操作)
 ```
 
-## Deployment
+- **User**: 用户
+- **Role**: 角色
+- **Permission**: 权限（菜单 + 操作，支持树形结构）
+- **UserRole**: 用户-角色
+- **RolePermission**: 角色-权限
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 实现功能
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 1. 认证模块 (Auth)
+
+| 功能         | 说明                                           |
+| ------------ | ---------------------------------------------- |
+| 账号密码登录 | 用户名 + 密码，返回 JWT                        |
+| 用户注册     | 创建新用户                                     |
+| 刷新令牌     | 基于 Cookie 中的 refreshToken 刷新 accessToken |
+| 获取当前用户 | `/auth/me`                                     |
+| 获取用户菜单 | `/auth/menus` 返回当前用户可访问的菜单树       |
+| 魔法链接登录 | 发送登录邮件，点击链接一键登录                 |
+
+### 2. 用户模块 (User)
+
+| 功能             | 说明         |
+| ---------------- | ------------ |
+| 用户列表（分页） | 支持查询条件 |
+| 用户详情         | 含角色信息   |
+| 创建用户         |              |
+| 更新用户         |              |
+| 删除用户         |              |
+
+### 3. 角色模块 (Role)
+
+| 功能             | 说明                 |
+| ---------------- | -------------------- |
+| 角色列表（分页） |                      |
+| 角色详情         |                      |
+| 创建角色         |                      |
+| 更新角色         |                      |
+| 删除角色         |                      |
+| 查询角色权限     | 获取角色已分配的权限 |
+| 设置角色权限     | 为角色分配/更新权限  |
+
+### 4. 权限模块 (Permission)
+
+| 功能     | 说明                     |
+| -------- | ------------------------ |
+| 权限树   | 树形结构，支持菜单与操作 |
+| 权限详情 |                          |
+| 新增权限 |                          |
+| 修改权限 |                          |
+| 删除权限 |                          |
+
+### 5. 公共能力
+
+- **统一响应格式**：成功/分页/错误 DTO
+- **全局异常过滤**：统一错误返回
+- **JWT 全局守卫**：默认需认证，`@Public()` 标记公开接口
+- **Swagger 文档**：非生产环境自动启用
+- **Pino 日志**：结构化日志
+- **Redis 缓存**：Token 等缓存
+- **BullMQ 队列**：异步邮件发送
+- **分页工具**：通用分页查询
+
+## 快速开始
+
+### 环境要求
+
+- Node.js >= 18
+- pnpm
+- MySQL
+- Redis
+
+### 安装依赖
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 配置环境变量
 
-## Resources
+```bash
+cp .env.template .env
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 数据库迁移
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+pnpm migrate
+# 或
+pnpm prisma:generate
+pnpm prisma:push
+```
 
-## Support
+### 启动服务
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# 开发
+pnpm dev
 
-## Stay in touch
+# 生产
+pnpm build
+pnpm prod
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### API 文档
 
-## License
+非生产环境下启动后访问：`http://localhost:3000/docs`
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 脚本说明
+
+| 命令                       | 说明                     |
+| -------------------------- | ------------------------ |
+| `pnpm run dev`             | 开发模式（热重载）       |
+| `pnpm run build`           | 构建                     |
+| `pnpm run prod`            | 生产运行                 |
+| `pnpm run migrate`         | Prisma 迁移              |
+| `pnpm run prisma:push`     | 强制同步 schema 到数据库 |
+| `pnpm run prisma:generate` | 生成 Prisma Client       |
+| `pnpm run lint`            | ESLint                   |
