@@ -2,6 +2,8 @@
 
 基于 NestJS 的后台管理系统后端模板，提供完整的 RBAC 权限管理、用户认证、角色与权限配置等能力。
 
+对应前端项目地址：https://github.com/tx-819/react-admin
+
 ## 技术栈
 
 | 类别   | 技术                                       |
@@ -93,7 +95,7 @@ Role ──┬── UserRole ── User
 | 刷新令牌     | 基于 Cookie 中的 refreshToken 刷新 accessToken |
 | 获取当前用户 | `/auth/me`                                     |
 | 获取用户菜单 | `/auth/menus` 返回当前用户可访问的菜单树       |
-| 魔法链接登录 | 发送登录邮件，点击链接一键登录                 |
+| 邮箱链接登录 | 发送登录邮件，点击链接一键登录                 |
 
 ### 2. 用户模块 (User)
 
