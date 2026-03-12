@@ -7,6 +7,6 @@ export default registerAs('app', () => ({
     name: process.env.APP_NAME || 'app',
     version: process.env.APP_VERSION || '1.0.0',
     logLevel: process.env.APP_LOG_LEVEL || 'info',
-    env: process.env.APP_ENV || APP_ENVIRONMENT.LOCAL,
+    env: process.env.NODE_ENV || APP_ENVIRONMENT.DEVELOPMENT,
     frontendUrl: process.env.APP_FRONTEND_URL || 'http://localhost:3000',
 }));

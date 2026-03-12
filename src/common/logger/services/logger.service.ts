@@ -2,8 +2,6 @@ import { ConfigService } from '@nestjs/config';
 import { Params } from 'nestjs-pino';
 import { IncomingMessage } from 'http';
 
-import { APP_ENVIRONMENT } from 'src/app/enums/app.enum';
-
 /**
  * Creates Pino logger configuration for NestJS application
  *
@@ -19,7 +17,7 @@ import { APP_ENVIRONMENT } from 'src/app/enums/app.enum';
  */
 export const createLoggerConfig = (configService: ConfigService): Params => {
     const env = configService.get<string>('app.env');
-    const isLocal = env === APP_ENVIRONMENT.LOCAL;
+    const isLocal = env === 'development';
     const logLevel = configService.get<string>('app.logLevel', 'info');
 
     return {

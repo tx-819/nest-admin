@@ -8,13 +8,17 @@ import { RequestModule } from './request/request.module';
 import { CacheModule } from './cache/cache.module';
 import { EmailModule } from './email/email.module';
 import { QueueModule } from './queue/queue.module';
+import { APP_ENVIRONMENT } from 'src/app/enums/app.enum';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
             load: configs,
-            envFilePath: ['.env'],
+            envFilePath: [
+                '.env',
+                `.env.${process.env.NODE_ENV || APP_ENVIRONMENT.DEVELOPMENT}`,
+            ],
             cache: true,
         }),
         CustomLoggerModule,

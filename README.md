@@ -161,6 +161,16 @@ pnpm install
 cp .env.template .env
 ```
 
+配置从 `.env` 加载，环境由 `NODE_ENV` 控制：
+
+| 环境 | 命令                            | NODE_ENV    |
+| ---- | ------------------------------- | ----------- |
+| 开发 | `pnpm dev`                      | development |
+| 测试 | `pnpm test` / `pnpm start:test` | test        |
+| 生产 | `pnpm prod`                     | production  |
+
+不同环境需不同配置时，可维护 `.env.development`、`.env.production` 等，启动前复制为 `.env`，或通过部署脚本切换。
+
 ### 数据库迁移
 
 ```bash
@@ -187,12 +197,13 @@ pnpm prod
 
 ## 脚本说明
 
-| 命令                       | 说明                     |
-| -------------------------- | ------------------------ |
-| `pnpm run dev`             | 开发模式（热重载）       |
-| `pnpm run build`           | 构建                     |
-| `pnpm run prod`            | 生产运行                 |
-| `pnpm run migrate`         | Prisma 迁移              |
-| `pnpm run prisma:push`     | 强制同步 schema 到数据库 |
-| `pnpm run prisma:generate` | 生成 Prisma Client       |
-| `pnpm run lint`            | ESLint                   |
+| 命令                       | 说明                                     |
+| -------------------------- | ---------------------------------------- |
+| `pnpm run dev`             | 开发模式（NODE_ENV=development，热重载） |
+| `pnpm run prod`            | 生产运行（NODE_ENV=production）          |
+| `pnpm run start:test`      | 测试环境运行（NODE_ENV=test）            |
+| `pnpm run build`           | 构建                                     |
+| `pnpm run migrate`         | Prisma 迁移                              |
+| `pnpm run prisma:push`     | 强制同步 schema 到数据库                 |
+| `pnpm run prisma:generate` | 生成 Prisma Client                       |
+| `pnpm run lint`            | ESLint                                   |
