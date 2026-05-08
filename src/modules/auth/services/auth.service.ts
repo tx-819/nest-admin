@@ -13,7 +13,7 @@ import { User } from 'src/generated/prisma/client';
 import { MenuTreeDto } from 'src/modules/permission/dtos/menu.dto';
 import { PermissionService } from 'src/modules/permission/services/permission.service';
 import { uniqBy } from 'lodash';
-import { SendLoginEmailDto } from '../dtos/auth.dto';
+import { ActionListDto, SendLoginEmailDto } from '../dtos/auth.dto';
 import { EmailQueueService } from 'src/common/queue/services/email-queue.service';
 import { ConfigService } from '@nestjs/config';
 import { renderMagicLoginEmail } from 'src/common/email/templates/magic-login.template';
@@ -100,6 +100,21 @@ export class AuthService {
             await this.permissionService.getPermissionsByRoles(roleIds);
         const uniquePermissions = uniqBy(permissions, 'id');
         return this.permissionService.buildMenuTrees(uniquePermissions);
+    }
+
+    async getActionsByUser(user: User): Promise<ActionListDto[]> {
+        if (user.isSuper) {
+            const permissions =
+                await this.permissionService.getAllPermissions();
+            return this.permissionService.buildActions(permissions);
+        }
+        const roles = await this.roleService.getRolesByUser(user);
+        if (roles.length === 0) return [];
+        const roleIds = roles.map(r => r.id);
+        const permissions =
+            await this.permissionService.getPermissionsByRoles(roleIds);
+        const uniquePermissions = uniqBy(permissions, 'id');
+        return this.permissionService.buildActions(uniquePermissions);
     }
 
     async sendLoginEmail(sendLoginEmailDto: SendLoginEmailDto): Promise<void> {

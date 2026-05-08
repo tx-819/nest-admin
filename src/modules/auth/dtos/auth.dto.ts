@@ -32,3 +32,26 @@ export class SendLoginEmailDto {
     @IsNotEmpty()
     email: string;
 }
+
+export class ActionDto {
+    @ApiProperty({ description: '权限标识' })
+    @IsString()
+    @IsNotEmpty()
+    code: string;
+
+    @ApiProperty({ description: '权限名称' })
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+}
+
+export class ActionListDto {
+    @ApiProperty({ description: '页面路径（全路径）' })
+    @IsString()
+    @IsNotEmpty()
+    pathname: string;
+
+    @ApiProperty({ description: '操作列表' })
+    @Type(() => ActionDto)
+    actions: ActionDto[];
+}

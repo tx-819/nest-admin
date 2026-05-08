@@ -3,14 +3,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Permission } from 'src/generated/prisma/client';
 import {
     CreatePermissionDto,
+    PermissionActionGroup,
     PermissionTreeDto,
     UpdatePermissionDto,
-} from '../dtos/permission.dto';
-import { Prisma } from 'src/generated/prisma/client';
-import {
     PERMISSION_TYPE_ACTION,
     PERMISSION_TYPE_MENU,
 } from '../dtos/permission.dto';
+import { Prisma } from 'src/generated/prisma/client';
 import { MenuTreeDto } from '../dtos/menu.dto';
 import { filter, groupBy, map as mapLodash, sortBy } from 'lodash';
 
@@ -140,6 +139,93 @@ export class PermissionService {
         );
         const menusByParentId = groupBy(menus, p => p.parentId ?? 'null');
         return this.buildMenuTree('null', menusByParentId);
+    }
+
+    /**
+     * 将 action 按所属菜单页面的全路径分组；仅启用且有非空 code。
+     * 使用当前列表构建 id 映射，以便在角色子集权限下仍能解析祖先 menu 路径。
+     */
+    buildActions(permissions: Permission[]): PermissionActionGroup[] {
+        const byId = new Map<number, Permission>(
+            permissions.map(p => [p.id, p])
+        );
+        const actions = permissions.filter(
+            (p): p is Permission & { code: string } =>
+                p.permissionType === PERMISSION_TYPE_ACTION &&
+                p.status &&
+                typeof p.code === 'string' &&
+                p.code.length > 0
+        );
+        const grouped = new Map<
+            string,
+            Map<string, { code: string; name: string }>
+        >();
+        for (const action of actions) {
+            const pathname = this.menuFullPathForAction(action, byId);
+            if (!grouped.has(pathname)) {
+                grouped.set(pathname, new Map());
+            }
+            const { code, name } = action;
+            grouped.get(pathname)!.set(code, { code, name });
+        }
+        return sortBy(
+            [...grouped.entries()].map(([pathname, byCode]) => ({
+                pathname,
+                actions: sortBy([...byCode.values()], a => a.code),
+            })),
+            ['pathname']
+        );
+    }
+
+    private menuFullPathForAction(
+        action: Permission,
+        byId: Map<number, Permission>
+    ): string {
+        let id: number | null = action.parentId;
+        let menuId: number | null = null;
+        const seen = new Set<number>();
+        while (id != null) {
+            if (seen.has(id)) {
+                return '/';
+            }
+            seen.add(id);
+            const p = byId.get(id);
+            if (!p) break;
+            if (p.permissionType === PERMISSION_TYPE_MENU) {
+                menuId = p.id;
+                break;
+            }
+            id = p.parentId;
+        }
+        if (menuId == null) {
+            return '/';
+        }
+        return this.menuFullPath(menuId, byId);
+    }
+
+    private menuFullPath(
+        menuId: number,
+        byId: Map<number, Permission>
+    ): string {
+        const parts: string[] = [];
+        const seen = new Set<number>();
+        let id: number | null = menuId;
+        while (id != null) {
+            if (seen.has(id)) {
+                break;
+            }
+            seen.add(id);
+            const p = byId.get(id);
+            if (!p) break;
+            if (p.permissionType === PERMISSION_TYPE_MENU && p.path?.trim()) {
+                parts.unshift(
+                    p.path.trim().replace(/^\/+/, '').replace(/\/+$/, '')
+                );
+            }
+            id = p.parentId ?? null;
+        }
+        const joined = parts.filter(Boolean).join('/');
+        return joined ? `/${joined}` : '/';
     }
 
     private buildMenuTree(

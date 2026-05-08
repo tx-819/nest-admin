@@ -14,7 +14,12 @@ import { ConfigService } from '@nestjs/config';
 import type { Response, Request } from 'express';
 import { LocalAuthGuard } from '../guards/local.auth.guard';
 import { MagicLoginAuthGuard } from '../guards/magic-login.auth.guard';
-import { AuthResponseDto, LoginDto, SendLoginEmailDto } from '../dtos/auth.dto';
+import {
+    ActionListDto,
+    AuthResponseDto,
+    LoginDto,
+    SendLoginEmailDto,
+} from '../dtos/auth.dto';
 import { ReqUser } from '../decorators/user-request.decorator';
 import type { User } from 'src/generated/prisma/client';
 import { DocResponse } from 'src/common/doc/decorators/doc.response.decorator';
@@ -72,6 +77,13 @@ export class AuthController {
     @DocResponse({ serialization: MenuTreeDto })
     getMenus(@ReqUser() user: User): Promise<MenuTreeDto[]> {
         return this.authService.getMenuTreeByUser(user);
+    }
+
+    @Get('actions')
+    @ApiOperation({ summary: '获取当前用户拥有的操作' })
+    @DocResponse({ serialization: ActionListDto })
+    getActions(@ReqUser() user: User): Promise<ActionListDto[]> {
+        return this.authService.getActionsByUser(user);
     }
 
     @Post('register')

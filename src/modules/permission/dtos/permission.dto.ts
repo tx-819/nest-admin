@@ -20,6 +20,12 @@ export const PERMISSION_TYPES = [
     PERMISSION_TYPE_ACTION,
 ] as const;
 
+/** 按路由分组的操作权限（供 Permission 层返回，字段与 Auth 侧 ActionListDto 对齐） */
+export type PermissionActionGroup = {
+    pathname: string;
+    actions: Array<{ code: string; name: string }>;
+};
+
 export class PermissionDto extends BaseDto implements Permission {
     @ApiProperty({ example: '用户管理' })
     @IsString()
