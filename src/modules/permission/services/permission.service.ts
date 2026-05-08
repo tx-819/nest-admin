@@ -11,7 +11,7 @@ import {
     PERMISSION_TYPE_ACTION,
     PERMISSION_TYPE_MENU,
 } from '../dtos/permission.dto';
-import { AuthListDto, MenuTreeDto } from '../dtos/menu.dto';
+import { MenuTreeDto } from '../dtos/menu.dto';
 import { filter, groupBy, map as mapLodash, sortBy } from 'lodash';
 
 @Injectable()
@@ -138,35 +138,22 @@ export class PermissionService {
             filter(permissions, p => p.permissionType === PERMISSION_TYPE_MENU),
             ['orderNo', 'id']
         );
-        const actions = filter(
-            permissions,
-            p => p.permissionType === PERMISSION_TYPE_ACTION
-        );
         const menusByParentId = groupBy(menus, p => p.parentId ?? 'null');
-        const actionsByParentId = groupBy(actions, p => p.parentId ?? 'null');
-        return this.buildMenuTree('null', menusByParentId, actionsByParentId);
+        return this.buildMenuTree('null', menusByParentId);
     }
 
     private buildMenuTree(
         parentKey: string,
-        menusByParentId: Record<string, Permission[]>,
-        actionsByParentId: Record<string, Permission[]>
+        menusByParentId: Record<string, Permission[]>
     ): MenuTreeDto[] {
         const menus = menusByParentId[parentKey] ?? [];
         return mapLodash(menus, menu => {
-            const actions = actionsByParentId[String(menu.id)] ?? [];
-            const authList: AuthListDto[] = mapLodash(
-                filter(actions, a => a.code != null),
-                a => ({ code: a.code!, name: a.name })
-            );
             const children = this.buildMenuTree(
                 String(menu.id),
-                menusByParentId,
-                actionsByParentId
+                menusByParentId
             );
             return {
                 ...menu,
-                authList: authList.length > 0 ? authList : null,
                 children: children.length > 0 ? children : null,
             };
         });

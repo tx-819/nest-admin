@@ -21,10 +21,6 @@ export class MenuTreeDto extends PermissionDto {
     @Exclude()
     declare code: string | null;
 
-    @ApiProperty({ type: [() => AuthListDto] })
-    @Type(() => AuthListDto)
-    authList: AuthListDto[] | null;
-
     @ApiProperty({ type: [() => MenuTreeDto] })
     @Type(() => MenuTreeDto)
     children: MenuTreeDto[] | null;
