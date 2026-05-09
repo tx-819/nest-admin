@@ -10,6 +10,7 @@ import {
 import { HelperPaginationService } from 'src/common/helper/services/helper.pagination.service';
 import { Prisma } from 'src/generated/prisma/client';
 import { UserListQueryDto } from '../dtos/user.dto';
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -81,8 +82,10 @@ export class UserService {
 
     async create(createDto: CreateUserDto): Promise<void> {
         const { rolesIds, ...data } = createDto;
+        const hashedPassword = await hash(data.password ?? '123456', 12);
         const dataToCreate: Prisma.UserCreateInput = {
             ...data,
+            password: hashedPassword,
             ...(rolesIds?.length
                 ? {
                       roles: {
@@ -97,14 +100,14 @@ export class UserService {
     }
 
     async update(id: number, updateDto: UpdateUserDto): Promise<void> {
-        const { rolesIds, ...data } = updateDto;
+        const { roleIds, ...data } = updateDto;
         const dataToUpdate: Prisma.UserUpdateInput = { ...data };
-        if (rolesIds !== undefined) {
+        if (roleIds !== undefined) {
             dataToUpdate.roles = {
                 deleteMany: {},
-                ...(rolesIds.length > 0
+                ...(roleIds.length > 0
                     ? {
-                          create: rolesIds.map(roleId => ({
+                          create: roleIds.map(roleId => ({
                               role: { connect: { id: roleId } },
                           })),
                       }

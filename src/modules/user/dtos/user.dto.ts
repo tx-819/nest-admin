@@ -74,7 +74,7 @@ export class CreateUserDto extends PickType(UserDto, [
         example: faker.internet.password(),
     })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     password: string;
 
     @ApiProperty({
@@ -98,7 +98,7 @@ export class UpdateUserDto extends PickType(UserDto, [
     @IsArray()
     @IsInt({ each: true })
     @IsOptional()
-    rolesIds: number[];
+    roleIds: number[];
 }
 
 export class UserListQueryDto extends PaginationParamsDto {

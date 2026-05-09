@@ -1,7 +1,37 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import {
+    IsArray,
+    IsEmail,
+    IsInt,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+} from 'class-validator';
 import { UserDto } from 'src/modules/user/dtos/user.dto';
 import { Type } from 'class-transformer';
+import { faker } from '@faker-js/faker';
+
+export class RegisterDto extends PickType(UserDto, [
+    'username',
+    'nickname',
+    'email',
+    'avatar',
+]) {
+    @ApiProperty({
+        example: faker.internet.password(),
+    })
+    @IsString()
+    @IsNotEmpty()
+    password: string;
+
+    @ApiProperty({
+        example: [1],
+    })
+    @IsArray()
+    @IsInt({ each: true })
+    @IsOptional()
+    rolesIds: number[];
+}
 
 export class LoginDto {
     @ApiProperty({ description: '用户名', example: 'admin' })

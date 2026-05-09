@@ -13,7 +13,11 @@ import { User } from 'src/generated/prisma/client';
 import { MenuTreeDto } from 'src/modules/permission/dtos/menu.dto';
 import { PermissionService } from 'src/modules/permission/services/permission.service';
 import { uniqBy } from 'lodash';
-import { ActionListDto, SendLoginEmailDto } from '../dtos/auth.dto';
+import {
+    ActionListDto,
+    RegisterDto,
+    SendLoginEmailDto,
+} from '../dtos/auth.dto';
 import { EmailQueueService } from 'src/common/queue/services/email-queue.service';
 import { ConfigService } from '@nestjs/config';
 import { renderMagicLoginEmail } from 'src/common/email/templates/magic-login.template';
@@ -53,7 +57,7 @@ export class AuthService {
         return result;
     }
 
-    async register(registerDto: CreateUserDto): Promise<UserDto> {
+    async register(registerDto: RegisterDto): Promise<UserDto> {
         const user = await this.userService.findOne(registerDto.username);
         if (user) {
             throw new BadRequestException('User already exists');
