@@ -19,6 +19,14 @@ async function bootstrap() {
     app.useLogger(logger);
     app.use(cookieParser());
 
+    const corsOrigins = config.get<string[]>('app.corsOrigins') ?? [];
+    if (corsOrigins.length > 0) {
+        app.enableCors({
+            origin: corsOrigins,
+            credentials: true,
+        });
+    }
+
     if (env !== APP_ENVIRONMENT.PRODUCTION) {
         setupSwagger(app);
     }
