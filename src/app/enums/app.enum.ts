@@ -1,7 +1,7 @@
 export enum APP_ENVIRONMENT {
+    DEVELOPMENT = 'development',
     PRODUCTION = 'production',
     TEST = 'test',
-    DEVELOPMENT = 'development',
 }
 
 export enum APP_BULL_QUEUES {

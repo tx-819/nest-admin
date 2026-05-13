@@ -1,7 +1,9 @@
 import { registerAs } from '@nestjs/config';
 import { parseCorsOrigins } from './parse-cors-origins';
+import { APP_ENVIRONMENT } from 'src/app/enums/app.enum';
 
 export default registerAs('app', () => ({
+    env: process.env.NODE_ENV || APP_ENVIRONMENT.DEVELOPMENT,
     port: process.env.APP_PORT || 3000,
     host: process.env.APP_HOST || 'localhost',
     name: process.env.APP_NAME || 'app',
