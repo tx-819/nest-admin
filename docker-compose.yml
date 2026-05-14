@@ -1,6 +1,10 @@
 # 服务器侧 compose：与 workflow 写入的 .env 配合（DOCKER_IMAGE、MYSQL_* 等）。
 #
-# 本服务不绑定宿主机端口。接入方式：
+# 宿主机端口：
+#   - api 仍不映射宿主机端口（经 edge 反代）。
+#   - mysql / redis 仅绑定 127.0.0.1，供本机工具或「Navicat / Redis 客户端 + SSH 隧道」使用。
+#     阿里云安全组：放行 SSH（22）即可；勿对 0.0.0.0/0 放行 3306/6379。SSH 源 IP 建议收紧为你的出口网段。
+# 接入方式：
 #   1) 内网：加入 `edge` 的容器可通过 docker DNS 访问 `http://nest-admin:3000`（如 react-admin 的 BACKEND_UPSTREAM）。
 #   2) 公网 API 子域名：由服务器 ~/edge/ 的 nginx（deploy/edge）反代到本容器，勿使用 docker-compose.caddy.yml。
 
@@ -22,7 +26,11 @@ services:
             APP_PORT: 3000
             APP_NAME: ${APP_NAME:-nest-admin}
             APP_LOG_LEVEL: ${APP_LOG_LEVEL:-info}
-            DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER:?MYSQL_USER is required}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}
+            MYSQL_HOST: ${MYSQL_HOST:-mysql}
+            MYSQL_PORT: ${MYSQL_PORT:-3306}
+            MYSQL_DATABASE: ${MYSQL_DATABASE:?MYSQL_DATABASE is required}
             REDIS_URL: redis://redis:6379
             AUTH_ACCESS_TOKEN_SECRET: ${AUTH_ACCESS_TOKEN_SECRET:?AUTH_ACCESS_TOKEN_SECRET is required}
             AUTH_ACCESS_TOKEN_EXP: ${AUTH_ACCESS_TOKEN_EXP:-15m}
@@ -73,6 +81,8 @@ services:
             TZ: ${TZ:-Asia/Shanghai}
         volumes:
             - mysql_data:/var/lib/mysql
+        ports:
+            - '127.0.0.1:3306:3306'
         networks:
             - internal
         healthcheck:
@@ -98,6 +108,8 @@ services:
         command: ['redis-server', '--appendonly', 'yes']
         volumes:
             - redis_data:/data
+        ports:
+            - '127.0.0.1:6379:6379'
         networks:
             - internal
         healthcheck:

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from 'src/modules/user/services/user.service';
 import { TokenService } from './token.service';
-import { CreateUserDto, UserDto } from 'src/modules/user/dtos/user.dto';
+import {  UserDto } from 'src/modules/user/dtos/user.dto';
 import { compare, hash } from 'bcrypt';
 import { RoleService } from 'src/modules/role/services/role.service';
 import { User } from 'src/generated/prisma/client';

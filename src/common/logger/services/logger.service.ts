@@ -16,8 +16,6 @@ import { IncomingMessage } from 'http';
  * @returns Pino logger configuration params
  */
 export const createLoggerConfig = (configService: ConfigService): Params => {
-    const env = configService.get<string>('app.env');
-    const isLocal = env === 'development';
     const logLevel = configService.get<string>('app.logLevel', 'info');
 
     return {
@@ -26,19 +24,20 @@ export const createLoggerConfig = (configService: ConfigService): Params => {
             level: logLevel,
 
             // Pretty printing for local development only
-            transport: isLocal
-                ? {
-                      target: 'pino-pretty',
-                      options: {
-                          colorize: true,
-                          levelFirst: true,
-                          translateTime: 'yyyy-mm-dd HH:MM:ss.l',
-                          ignore: 'pid,hostname',
-                          singleLine: false,
-                          messageFormat: '{context} {msg}',
-                      },
-                  }
-                : undefined,
+            transport:
+                process.env.NODE_ENV === 'development'
+                    ? {
+                          target: 'pino-pretty',
+                          options: {
+                              colorize: true,
+                              levelFirst: true,
+                              translateTime: 'yyyy-mm-dd HH:MM:ss.l',
+                              ignore: 'pid,hostname',
+                              singleLine: false,
+                              messageFormat: '{context} {msg}',
+                          },
+                      }
+                    : undefined,
 
             // Standard formatters for distributed logging
             formatters: {
@@ -57,7 +56,7 @@ export const createLoggerConfig = (configService: ConfigService): Params => {
 
             // Base context fields - included in every log
             base: {
-                environment: env,
+                environment: process.env.NODE_ENV,
                 service: configService.get<string>('app.name', 'nestjs-app'),
                 version: configService.get<string>(
                     'app.versioning.version',
@@ -98,7 +97,10 @@ export const createLoggerConfig = (configService: ConfigService): Params => {
                 err: (err: any) => ({
                     type: err.type || err.name,
                     message: err.message,
-                    stack: isLocal ? err.stack : undefined, // Stack traces only in local
+                    stack:
+                        process.env.NODE_ENV === 'development'
+                            ? err.stack
+                            : undefined, // Stack traces only in local
                 }),
             },
 

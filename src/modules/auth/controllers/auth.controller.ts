@@ -26,7 +26,6 @@ import { DocResponse } from 'src/common/doc/decorators/doc.response.decorator';
 import { CreateUserDto, UserDto } from 'src/modules/user/dtos/user.dto';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { Public } from '../decorators/public.decorator';
-import { APP_ENVIRONMENT } from 'src/app/enums/app.enum';
 import { MenuTreeDto } from 'src/modules/permission/dtos/menu.dto';
 
 @Controller('auth')
@@ -48,9 +47,7 @@ export class AuthController {
     ) {
         const { accessToken, refreshToken } =
             await this.authService.createToken(user.id);
-        const isProduction =
-            this.configService.get<string>('app.env') ===
-            APP_ENVIRONMENT.PRODUCTION;
+        const isProduction = process.env.NODE_ENV === 'production';
         const ttl = this.configService.get<number>('auth.refreshToken.ttl');
         if (!ttl) {
             throw new BadRequestException('Refresh token TTL is not set');
@@ -125,9 +122,7 @@ export class AuthController {
     ) {
         const { accessToken, refreshToken } =
             await this.authService.createToken(user.id);
-        const isProduction =
-            this.configService.get<string>('app.env') ===
-            APP_ENVIRONMENT.PRODUCTION;
+        const isProduction = process.env.NODE_ENV === 'production';
         const ttl = this.configService.get<number>('auth.refreshToken.ttl');
         if (!ttl) {
             throw new BadRequestException('Refresh token TTL is not set');
