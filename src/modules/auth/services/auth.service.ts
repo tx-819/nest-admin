@@ -22,6 +22,7 @@ import { EmailQueueService } from 'src/common/queue/services/email-queue.service
 import { ConfigService } from '@nestjs/config';
 import { renderMagicLoginEmail } from 'src/common/email/templates/magic-login.template';
 import { EmailService } from 'src/common/email/services/email.service';
+import { ROLE_CODE_USER } from 'src/modules/role/constants/role.constant';
 
 @Injectable()
 export class AuthService {
@@ -62,12 +63,22 @@ export class AuthService {
         if (user) {
             throw new BadRequestException('User already exists');
         }
-        await this.userService.create(registerDto);
+        const defaultRole = await this.roleService.findByCode(ROLE_CODE_USER);
+        if (!defaultRole) {
+            throw new BadRequestException(
+                `Default role "${ROLE_CODE_USER}" not found`
+            );
+        }
+        const { rolesIds: _rolesIds, ...userData } = registerDto;
+        await this.userService.create({
+            ...userData,
+            rolesIds: [defaultRole.id],
+        });
         const created = await this.userService.findOne(registerDto.username);
         if (!created) {
             throw new BadRequestException('User creation failed');
         }
-        const { password: _, ...result } = created;
+        const { password: _password, ...result } = created;
         return result as UserDto;
     }
 

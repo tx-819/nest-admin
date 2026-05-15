@@ -55,6 +55,12 @@ export class RoleService {
         return role;
     }
 
+    async findByCode(code: string): Promise<Role | null> {
+        return this.prisma.role.findUnique({
+            where: { code },
+        });
+    }
+
     async create(createDto: CreateRoleDto): Promise<RoleDto> {
         const role = await this.prisma.role.create({
             data: createDto,
