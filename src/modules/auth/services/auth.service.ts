@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { UserService } from 'src/modules/user/services/user.service';
 import { TokenService } from './token.service';
-import {  UserDto } from 'src/modules/user/dtos/user.dto';
-import { compare, hash } from 'bcrypt';
+import { UserDto } from 'src/modules/user/dtos/user.dto';
+import { compare } from 'bcrypt';
 import { RoleService } from 'src/modules/role/services/role.service';
 import { User } from 'src/generated/prisma/client';
 import { MenuTreeDto } from 'src/modules/permission/dtos/menu.dto';
@@ -62,11 +62,7 @@ export class AuthService {
         if (user) {
             throw new BadRequestException('User already exists');
         }
-        const hashedPassword = await hash(registerDto.password, 12);
-        await this.userService.create({
-            ...registerDto,
-            password: hashedPassword,
-        });
+        await this.userService.create(registerDto);
         const created = await this.userService.findOne(registerDto.username);
         if (!created) {
             throw new BadRequestException('User creation failed');
