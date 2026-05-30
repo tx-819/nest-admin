@@ -14,9 +14,15 @@ import { faker } from '@faker-js/faker';
 export class RegisterDto extends PickType(UserDto, [
     'username',
     'nickname',
-    'email',
     'avatar',
 ]) {
+    @ApiProperty({
+        example: faker.internet.email(),
+    })
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
+
     @ApiProperty({
         example: faker.internet.password(),
     })
@@ -58,6 +64,51 @@ export class AuthResponseDto {
 
 export class SendLoginEmailDto {
     @ApiProperty({ description: '邮箱', example: 'test@example.com' })
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
+}
+
+export class WechatMiniLoginDto {
+    @ApiProperty({ description: 'wx.login 返回的临时登录凭证 code' })
+    @IsString()
+    @IsNotEmpty()
+    code: string;
+}
+
+export class WechatAuthResponseDto extends AuthResponseDto {
+    @ApiProperty({
+        description: '刷新令牌（小程序不支持 Cookie 时返回）',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    refreshToken?: string;
+}
+
+export class UpdateWechatProfileDto {
+    @ApiProperty({ description: '昵称', required: false })
+    @IsString()
+    @IsOptional()
+    nickname?: string;
+
+    @ApiProperty({ description: '头像（已上传后的 URL）', required: false })
+    @IsString()
+    @IsOptional()
+    avatar?: string;
+}
+
+export class WechatPhoneCodeDto {
+    @ApiProperty({
+        description: 'getPhoneNumber 回调返回的 code（非 wx.login 的 code）',
+    })
+    @IsString()
+    @IsNotEmpty()
+    code: string;
+}
+
+export class BindEmailDto {
+    @ApiProperty({ description: '要绑定的邮箱', example: 'test@example.com' })
     @IsEmail()
     @IsNotEmpty()
     email: string;

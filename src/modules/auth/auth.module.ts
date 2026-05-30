@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { MagicLoginStrategy } from './strategies/magic-login.strategy';
 import { TokenService } from './services/token.service';
+import { WechatService } from './services/wechat.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -40,6 +41,7 @@ import { QueueModule } from 'src/common/queue/queue.module';
     providers: [
         AuthService,
         TokenService,
+        WechatService,
         LocalStrategy,
         JwtStrategy,
         MagicLoginStrategy,

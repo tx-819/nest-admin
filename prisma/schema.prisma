@@ -17,17 +17,21 @@ datasource db {
 
 model User {
   id        Int        @id @default(autoincrement())
-  email     String     @unique
+  email     String?    @unique
   username  String     @unique
-  password  String
+  password  String?
   nickname  String?
   avatar    String?
+  phone     String?    @map("phone")
+  openid    String?    @unique @map("wx_openid")
+  unionid   String?    @map("wx_unionid")
   isSuper   Boolean    @default(false) @map("is_super")
   status    Boolean    @default(true)
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
   roles     UserRole[]
 
+  @@index([unionid])
   @@map("user")
 }
 

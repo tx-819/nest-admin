@@ -1,5 +1,9 @@
 import { PrismaService } from 'src/common/database/services/database.service';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { User, Role } from 'src/generated/prisma/client';
 import { ApiPaginatedDataDto } from 'src/common/response/dtos/response.paginated.dto';
 import {
@@ -77,6 +81,70 @@ export class UserService {
     async findOneByEmail(email: string): Promise<User | null> {
         return this.prisma.user.findUnique({
             where: { email },
+        });
+    }
+
+    async findByOpenid(openid: string): Promise<User | null> {
+        return this.prisma.user.findUnique({
+            where: { openid },
+        });
+    }
+
+    /**
+     * 创建微信小程序用户（首次登录自动注册）。
+     * 微信用户初始无密码、无邮箱，使用占位 username 满足唯一非空约束。
+     */
+    async createWechatUser(params: {
+        openid: string;
+        unionid?: string;
+        roleId: number;
+    }): Promise<User> {
+        const { openid, unionid, roleId } = params;
+        return this.prisma.user.create({
+            data: {
+                username: `wx_${openid}`,
+                openid,
+                unionid: unionid ?? null,
+                roles: {
+                    create: [{ role: { connect: { id: roleId } } }],
+                },
+            },
+        });
+    }
+
+    async bindEmail(id: number, email: string): Promise<User> {
+        const existing = await this.findOneByEmail(email);
+        if (existing && existing.id !== id) {
+            throw new BadRequestException('该邮箱已被其他账号绑定');
+        }
+        return this.prisma.user.update({
+            where: { id },
+            data: { email },
+        });
+    }
+
+    /** 更新用户资料（头像昵称填写能力收集后按普通字段提交） */
+    async updateProfile(
+        id: number,
+        data: { nickname?: string; avatar?: string }
+    ): Promise<User> {
+        await this.detail(id);
+        return this.prisma.user.update({
+            where: { id },
+            data: {
+                ...(data.nickname !== undefined
+                    ? { nickname: data.nickname }
+                    : {}),
+                ...(data.avatar !== undefined ? { avatar: data.avatar } : {}),
+            },
+        });
+    }
+
+    async bindPhone(id: number, phone: string): Promise<User> {
+        await this.detail(id);
+        return this.prisma.user.update({
+            where: { id },
+            data: { phone },
         });
     }
 

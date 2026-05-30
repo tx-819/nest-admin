@@ -17,12 +17,14 @@ import {
     ActionListDto,
     RegisterDto,
     SendLoginEmailDto,
+    UpdateWechatProfileDto,
 } from '../dtos/auth.dto';
 import { EmailQueueService } from 'src/common/queue/services/email-queue.service';
 import { ConfigService } from '@nestjs/config';
 import { renderMagicLoginEmail } from 'src/common/email/templates/magic-login.template';
 import { EmailService } from 'src/common/email/services/email.service';
 import { ROLE_CODE_USER } from 'src/modules/role/constants/role.constant';
+import { WechatService, WechatPhoneInfo } from './wechat.service';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +35,8 @@ export class AuthService {
         private permissionService: PermissionService,
         private emailQueueService: EmailQueueService,
         private configService: ConfigService,
-        private emailService: EmailService
+        private emailService: EmailService,
+        private wechatService: WechatService
     ) {}
 
     async createToken(userId: number): Promise<{
@@ -50,6 +53,10 @@ export class AuthService {
         const user = await this.userService.findOne(username);
         if (!user) {
             throw new NotFoundException('User not found');
+        }
+        // 微信等第三方账号无密码，禁止使用账号密码登录
+        if (!user.password) {
+            return null;
         }
         if (!(await compare(password, user.password))) {
             return null;
@@ -96,6 +103,68 @@ export class AuthService {
 
     async me(userId: number): Promise<UserDto> {
         return this.userService.detailWithRoles(userId);
+    }
+
+    /**
+     * 微信小程序登录：code 换 openid -> 查找或创建用户 -> 生成自定义登录态。
+     * session_key 用完即弃，不保存、不下发。
+     */
+    async wechatMiniLogin(code: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        user: User;
+    }> {
+        const { openid, unionid } = await this.wechatService.code2Session(code);
+
+        let user = await this.userService.findByOpenid(openid);
+        if (!user) {
+            const defaultRole =
+                await this.roleService.findByCode(ROLE_CODE_USER);
+            if (!defaultRole) {
+                throw new BadRequestException(
+                    `Default role "${ROLE_CODE_USER}" not found`
+                );
+            }
+            user = await this.userService.createWechatUser({
+                openid,
+                unionid,
+                roleId: defaultRole.id,
+            });
+        }
+
+        const { accessToken, refreshToken } =
+            await this.tokenService.generateToken(user);
+        return { accessToken, refreshToken, user };
+    }
+
+    /** 更新微信用户资料（头像昵称填写能力） */
+    async updateWechatProfile(
+        userId: number,
+        dto: UpdateWechatProfileDto
+    ): Promise<UserDto> {
+        const user = await this.userService.updateProfile(userId, dto);
+        const { password: _password, ...result } = user;
+        return result as UserDto;
+    }
+
+    /** 通过 getPhoneNumber 的 code 换取手机号并回填用户 */
+    async bindWechatPhone(
+        userId: number,
+        code: string
+    ): Promise<WechatPhoneInfo> {
+        const phoneInfo = await this.wechatService.getPhoneNumber(code);
+        await this.userService.bindPhone(userId, phoneInfo.purePhoneNumber);
+        return phoneInfo;
+    }
+
+    /** 微信用户绑定真实邮箱 */
+    async bindWechatUserEmail(
+        userId: number,
+        email: string
+    ): Promise<UserDto> {
+        const user = await this.userService.bindEmail(userId, email);
+        const { password: _password, ...result } = user;
+        return result as UserDto;
     }
 
     async getMenuTreeByUser(user: User): Promise<MenuTreeDto[]> {
